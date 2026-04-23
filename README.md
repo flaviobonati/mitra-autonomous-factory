@@ -1,6 +1,6 @@
 # Mitra Autonomous Factory
 
-Canonical repository for the new autonomous software factory.
+Canonical repository for the autonomous software factory.
 
 This repo is the source of truth for:
 - factory phases and transition rules
@@ -11,7 +11,6 @@ This repo is the source of truth for:
 Current scope:
 - define the machine before building the control system in Mitra
 - keep prompts and schemas clean, deterministic, and auditable
-- avoid mixing this new architecture with the legacy factory
 
 ## Core Principles
 
@@ -41,4 +40,3 @@ There is no separate "scope approval" phase.
 - `docs/`: architecture decisions and operating model
 - `prompts/`: canonical persona prompts
 - `schemas/`: JSON schemas for machine-to-machine handoff
-

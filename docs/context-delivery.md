@@ -7,6 +7,9 @@ Gradual context delivery is correct.
 But "gradual" must never mean "insufficient".
 Each agent must always receive the minimum mandatory context required to make the current decision correctly.
 
+This document is for machine design and orchestration.
+It is not automatically part of the coordinator prompt.
+
 ## Context Layers
 
 ### 1. Fixed Layer
@@ -44,4 +47,3 @@ Contains:
 If an agent lacks enough context to safely decide, the system failed context assembly.
 The fix is not "let the agent improvise".
 The fix is to improve context packaging.
-
