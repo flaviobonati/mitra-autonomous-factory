@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DevHandoff",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "implemented_stories",
+    "implemented_entities",
+    "implemented_data_flows",
+    "known_gaps",
+    "known_risks",
+    "requires_seed_actions",
+    "test_accounts",
+    "round_type"
+  ],
+  "properties": {
+    "implemented_stories": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "implemented_entities": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "implemented_data_flows": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "known_gaps": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "known_risks": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "requires_seed_actions": { "type": "boolean" },
+    "test_accounts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["persona_id", "login_hint"],
+        "properties": {
+          "persona_id": { "type": "string" },
+          "login_hint": { "type": "string" }
+        }
+      }
+    },
+    "round_type": {
+      "type": "string",
+      "enum": ["R1", "RN"]
+    }
+  }
+}
+

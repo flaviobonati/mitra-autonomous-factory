@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "QAResult",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "design_score",
+    "ux_score",
+    "adherence_score",
+    "data_flow_score",
+    "story_accuracy_percent",
+    "gap_percent",
+    "story_gaps",
+    "ui_gaps",
+    "data_gaps",
+    "artifact_gaps",
+    "approved",
+    "failed_stories",
+    "failed_flows",
+    "bugs_found"
+  ],
+  "properties": {
+    "design_score": { "type": "number", "minimum": 0, "maximum": 10 },
+    "ux_score": { "type": "number", "minimum": 0, "maximum": 10 },
+    "adherence_score": { "type": "number", "minimum": 0, "maximum": 10 },
+    "data_flow_score": { "type": "number", "minimum": 0, "maximum": 10 },
+    "story_accuracy_percent": { "type": "number", "minimum": 0, "maximum": 100 },
+    "gap_percent": { "type": "number", "minimum": 0, "maximum": 100 },
+    "story_gaps": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "ui_gaps": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "data_gaps": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "artifact_gaps": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "approved": { "type": "boolean" },
+    "failed_stories": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "failed_flows": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "bugs_found": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

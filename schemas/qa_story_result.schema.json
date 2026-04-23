@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "QAStoryResult",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "story_id",
+    "story_title",
+    "persona_id",
+    "persona_name",
+    "story_type",
+    "priority",
+    "expected_story_summary",
+    "preconditions",
+    "test_status",
+    "story_accuracy_percent",
+    "story_gap_percent",
+    "ui_gap_percent",
+    "data_gap_percent",
+    "artifact_gap_percent",
+    "expected_steps_count",
+    "executed_steps_count",
+    "stopped_early",
+    "stop_reason",
+    "ui_evidence",
+    "data_flow_evidence",
+    "artifact_evidence",
+    "bugs_found",
+    "expected_vs_actual_summary",
+    "verdict"
+  ],
+  "properties": {
+    "story_id": { "type": "string" },
+    "story_title": { "type": "string" },
+    "persona_id": { "type": "string" },
+    "persona_name": { "type": "string" },
+    "story_type": {
+      "type": "string",
+      "enum": ["core", "supporting", "admin", "exception"]
+    },
+    "priority": {
+      "type": "string",
+      "enum": ["critical", "high", "medium", "low"]
+    },
+    "expected_story_summary": { "type": "string" },
+    "preconditions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "test_status": {
+      "type": "string",
+      "enum": ["not_started", "in_progress", "passed", "failed", "blocked", "incomplete"]
+    },
+    "story_accuracy_percent": { "type": "number", "minimum": 0, "maximum": 100 },
+    "story_gap_percent": { "type": "number", "minimum": 0, "maximum": 100 },
+    "ui_gap_percent": { "type": "number", "minimum": 0, "maximum": 100 },
+    "data_gap_percent": { "type": "number", "minimum": 0, "maximum": 100 },
+    "artifact_gap_percent": { "type": "number", "minimum": 0, "maximum": 100 },
+    "expected_steps_count": { "type": "integer", "minimum": 0 },
+    "executed_steps_count": { "type": "integer", "minimum": 0 },
+    "stopped_early": { "type": "boolean" },
+    "stop_reason": { "type": "string" },
+    "ui_evidence": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "data_flow_evidence": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "artifact_evidence": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "bugs_found": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "expected_vs_actual_summary": { "type": "string" },
+    "verdict": {
+      "type": "string",
+      "enum": ["passed", "failed", "blocked", "incomplete"]
+    }
+  }
+}
+
