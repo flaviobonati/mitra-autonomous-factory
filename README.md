@@ -26,11 +26,12 @@ Current scope:
 1. `Scope Discovery & Construction`
 2. `Development`
 3. `QA Horizontal`
-4. `QA Story Validation`
-5. `QA Consolidation`
-6. `Fix / Retest Loops`
-7. `Release Review`
-8. `Production / Monitoring / Learning`
+4. `Fix / Retest Horizontal` until the 10/10/10/10 gate passes
+5. `QA Story Validation`
+6. `Fix / Retest Story` when story batches fail
+7. `QA Consolidation`
+8. `Release Review`
+9. `Production / Monitoring / Learning`
 
 There is no separate "scope approval" phase.
 `Scope Discovery & Construction` ends only when the scope artifacts are approved.

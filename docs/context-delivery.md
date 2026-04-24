@@ -54,6 +54,7 @@ Contains:
 - `mission_id`
 - exact task
 - exact assigned scope
+- required model
 - inputs
 - required outputs
 - required evidence
@@ -65,6 +66,17 @@ Contains:
 ## Assembly Rule
 
 The Central Control System assembles context packets. The Coordinator validates them before acting.
+
+Model assignment is part of the packet:
+
+- Coordinator: GPT-5.5
+- Researcher: GPT-5.5
+- QA Horizontal: GPT-5.5
+- QA Story: GPT-5.5
+- QA Consolidator: GPT-5.5
+- Dev: Claude 4.7
+
+If the required model is unavailable, the mission is blocked. The Coordinator must not silently substitute another model.
 
 If required fields are missing:
 

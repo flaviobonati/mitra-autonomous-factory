@@ -90,6 +90,24 @@ claude --dangerously-skip-permissions -p - < "$1" > "$2" 2>&1
 
 O transporte pode variar por instalação, mas o contrato não muda: todo agente recebe prompt completo aplicável + contexto do produto + tarefa exata + outputs esperados.
 
+### 2.1 Modelos por persona
+
+O Coordenador deve registrar o modelo esperado no evento `agent_spawned` e no pacote de missão.
+
+Modelo padrão:
+
+- Coordenador: GPT-5.5
+- Researcher: GPT-5.5
+- QA Horizontal: GPT-5.5
+- QA Story: GPT-5.5
+- QA Consolidator: GPT-5.5
+
+Exceção:
+
+- Dev: Claude 4.7
+
+Se a infraestrutura não conseguir acionar o modelo exigido, a missão fica bloqueada como `blocked_model_unavailable`. Não substitua modelo silenciosamente.
+
 ---
 
 ## 3. O Que é Mitra
@@ -265,11 +283,12 @@ O lifecycle canônico é:
 1. `scope_discovery_construction`
 2. `development`
 3. `qa_horizontal`
-4. `qa_story_validation`
-5. `qa_consolidation`
-6. `fix_retest`
-7. `release_review`
-8. `production`
+4. `fix_retest_horizontal`
+5. `qa_story_validation`
+6. `fix_retest_story`
+7. `qa_consolidation`
+8. `release_review`
+9. `production`
 
 Não existe fase separada de "scope approval". A fase `scope_discovery_construction` termina quando os artefatos de escopo estiverem aprovados pelo Usuário.
 
@@ -303,6 +322,18 @@ Regras:
 - toda entidade operacional precisa aparecer em entidade, história ou fluxo
 - lacunas devem ser registradas, não escondidas
 
+Definição de história:
+
+- uma história é uma jornada de negócio testável de uma persona para concluir um objetivo
+- precisa ter `story_id`, persona, objetivo, precondições, passos ordenados, resultado esperado de UI, resultado esperado de dados/estado quando aplicável, artefatos esperados, exceções e critérios de aceite
+- não é válido escrever apenas "gestor acompanha tickets"; a história precisa dizer como ele entra, o que vê, onde clica, que estado muda e como o sucesso é verificado
+
+Definição de jornada:
+
+- uma jornada é a versão click-a-click executável de uma ou mais histórias
+- cada passo precisa ter ator, tela/rota, ação, resultado visível no DOM, resultado de dados quando aplicável e evidência esperada
+- se o QA precisa interpretar o que clicar ou como verificar, a jornada está incompleta
+
 Se escopo estiver incompleto, o Coordenador não deve avançar para Dev.
 
 ---
@@ -323,9 +354,32 @@ Input mínimo para Dev:
 - workdir
 - frontend path
 - backend path
+- repositório git interno do projeto
 - credenciais disponíveis no ambiente
 - round type (`R1` ou `RN`)
 - buglist/QA anterior quando aplicável
+
+### 9.1 Setup obrigatório antes de spawnar o Dev
+
+O Coordenador monta o ambiente antes de acionar Claude 4.7 para Dev.
+
+Antes do spawn, o workspace deve conter:
+
+- `workspaces/w-{wsId}/p-{pjId}/`
+- `AGENTS.md` apontando para o contrato Mitra
+- `system_prompt.md` apontando para o prompt nativo Mitra
+- `.env.local` com credenciais do projeto
+- `frontend/` iniciado a partir do template oficial
+- `backend/` com SDK e credenciais do projeto
+- assets oficiais Mitra no `frontend/public/`
+- repositório git interno inicializado para o código do projeto
+
+Regra de fonte:
+
+- o Dev sempre começa da última versão do git interno do projeto
+- ao terminar, o Dev commita no git interno e faz `deployToS3Mitra`
+- S3 é destino de deploy, não fonte de desenvolvimento
+- se o git interno estiver ausente ou incoerente, bloqueie a missão antes de spawnar o Dev
 
 Output mínimo do Dev:
 
@@ -375,7 +429,14 @@ Valida:
 - riscos transversais de FluxoDados
 - defeitos transversais
 
-QA Horizontal carrega o rigor do antigo QA completo como gate transversal. Ele não dá veredito final de cobertura de histórias; isso pertence a QA Story Validation e QA Consolidation.
+QA Horizontal carrega o rigor completo 10/10/10/10 como gate transversal. Ele não dá veredito final de cobertura de histórias; isso pertence a QA Story Validation e QA Consolidation.
+
+Fluxo obrigatório:
+
+- se QA Horizontal reprovar, o Coordenador deve gerar missão de fix para Dev
+- depois do fix, rodar QA Horizontal novamente
+- só avançar para QA Story Validation quando QA Horizontal passar 10/10/10/10
+- não gastar QA Story em produto que ainda falha no gate horizontal
 
 Outputs:
 
@@ -385,6 +446,8 @@ Outputs:
 ### 10.2 QA Story Validation
 
 Valida histórias em batches determinados pelo Sistema Central.
+
+QA Story só começa depois de QA Horizontal aprovado.
 
 Cada batch gera:
 

@@ -52,6 +52,34 @@ Operational QA scores:
 - `adherence_score`
 - `data_flow_score`
 
+## Story And Journey Definition
+
+A story is not a feature name and not a loose screen description. A story is a testable business journey for one persona trying to complete one business outcome.
+
+Every story must have:
+
+- stable `story_id`
+- persona and role
+- business objective
+- starting state and required preconditions
+- explicit ordered steps
+- UI expectation for each step
+- data/state expectation for each step when applicable
+- artifact/output expectation when applicable
+- exception paths and failure states
+- acceptance criteria
+
+A journey is the executable click-by-click version of one or more stories. It must be written so QA can reproduce it without interpretation. Each step should describe:
+
+- actor
+- route/screen
+- action by click, fill, select, upload, drag, submit or wait
+- expected DOM/UI result
+- expected database/state result when applicable
+- evidence to capture
+
+If a step cannot be executed or verified, it is not a valid journey step.
+
 ## Lifecycle
 
 ### 1. Scope Discovery & Construction
@@ -101,6 +129,7 @@ Required input:
 - native Mitra prompt or mandatory read reference
 - Dev prompt
 - project/workspace/workdir/credential context
+- internal git repository for the project frontend/runtime source
 
 Required outputs:
 
@@ -136,15 +165,40 @@ Shared rigor:
 
 Boundary:
 
-- QA Horizontal owns the former monolithic QA rigor: Design, UX, Aderencia and FluxoDados as a horizontal gate
+- QA Horizontal owns the complete horizontal QA rigor: Design, UX, Aderencia/Aderência and FluxoDados as a horizontal gate
 - QA Horizontal does not declare final business-story coverage; story batches do that separately
 
 Return rule:
 
 - if this layer finds a blocking failure, the product can return to Development immediately
-- if this layer passes, the system continues to story validation
+- the product must loop through Fix / Retest Horizontal until the horizontal 10/10/10/10 gate passes
+- only after this gate passes can the system continue to story validation
 
-### 4. QA Story Validation
+### 4. Fix / Retest Horizontal
+
+Goal:
+
+- close horizontal QA failures before story validation consumes tokens on a broken product shell
+
+Required inputs:
+
+- `qa_ui_ux_summary.json`
+- `bug_list.json`
+- prior Dev handoff
+
+Required outputs:
+
+- fix mission
+- updated handoff
+- evidence for each fixed horizontal item
+- horizontal retest result
+
+Return rule:
+
+- if horizontal retest fails, repeat Development fix mission
+- if horizontal retest passes 10/10/10/10, continue to QA Story Validation
+
+### 5. QA Story Validation
 
 Goal:
 
@@ -171,7 +225,30 @@ Return rule:
 - if a batch fails, the product can return to Development without waiting for unrelated future batches
 - if all required batches pass, the system continues to QA consolidation
 
-### 5. QA Consolidation
+### 6. Fix / Retest Story
+
+Goal:
+
+- close failed story batches without losing per-story traceability
+
+Required inputs:
+
+- failed `qa_story_results_batch_{NN}.json`
+- bugs and gaps tied to `story_id`
+- prior Dev handoff
+
+Required outputs:
+
+- fix mission by failed story and bug
+- updated handoff
+- retest result for affected story batches
+
+Return rule:
+
+- if story retest fails, repeat Development fix mission
+- if all affected stories pass, continue to QA Consolidation
+
+### 7. QA Consolidation
 
 Goal:
 
@@ -186,7 +263,7 @@ Return rule:
 
 - if consolidation finds missing coverage, missing artifacts or unresolved critical failures, the product returns to Development
 
-### 6. Fix / Retest
+### 8. Escalated Fix / Retest
 
 Goal:
 
@@ -211,7 +288,7 @@ Return rule:
 
 - repeated failure of the same item requires cause-root investigation before another Dev mission
 
-### 7. Release Review
+### 9. Release Review
 
 Goal:
 
@@ -226,7 +303,7 @@ Required checks:
 - credentials/accounts available
 - known gaps explicitly accepted or closed
 
-### 8. Production
+### 10. Production
 
 Goal:
 

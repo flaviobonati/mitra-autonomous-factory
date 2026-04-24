@@ -20,7 +20,7 @@ Leia estes dois documentos **INTEIROS**, nesta ordem, antes de gerar qualquer c�
 
 Este arquivo adiciona as **regras específicas da Fábrica** em cima do system prompt oficial. Onde houver conflito, este arquivo tem precedência — mas nunca há conflito real: este arquivo só estreita o que o system prompt oficial já permite.
 
-> **Regra de leitura:** você NÃO pode começar a codar antes de ler as duas fontes. O Coordenador vai validar sua primeira interação verificando se você usou conceitos do system prompt oficial (ex: `ChartContainer`, `ShadcnBarChart`, `pullFromS3Mitra`, `listIntegrationTemplatesMitra`).
+> **Regra de leitura:** você NÃO pode começar a codar antes de ler as duas fontes. O Coordenador vai validar sua primeira interação verificando se você usou conceitos do system prompt oficial (ex: `ChartContainer`, `ShadcnBarChart`, `deployToS3Mitra`, `listIntegrationTemplatesMitra`).
 
 ---
 
@@ -90,8 +90,6 @@ O template oficial da plataforma Mitra é **vendorizado no repo da fábrica** em
 - `backend/` — mitra-sdk + package.json + .env template
 - `node_modules/` — dependências pré-instaladas (~211 MB, evita `npm install` toda vez)
 
-> **IMPORTANTE**: `pullFromS3Mitra` **não retorna o template** quando o projeto é recém-criado — retorna apenas a última versão deployada (e projeto novo nunca foi deployado, então vem vazio). `pullFromS3Mitra` é pra **recovery** de projetos já deployados (engenharia reversa quando o working dir foi perdido), não pra setup inicial.
-
 ### 3.2. O que o Coordenador já monta pra você ANTES de te spawnar
 
 Você **não** precisa criar o projeto Mitra, copiar template, nem baixar credenciais — o Coordenador faz tudo isso antes de te spawnar. Ao começar a sessão, seu working dir (`/opt/mitra-factory/workspaces/w-{wsId}/p-{pjId}/`) já tem:
@@ -103,12 +101,13 @@ workspaces/w-{wsId}/p-{pjId}/
 ├── system_prompt.md   → symlink pro system_prompt.md OFICIAL da plataforma Mitra (LEIA INTEIRO antes de codar)
 ├── .env.example       → symlink (template de credenciais)
 ├── .env.local         → arquivo real com as credenciais DESTE projeto (MITRA_BASE_URL, MITRA_TOKEN, MITRA_WORKSPACE_ID, MITRA_PROJECT_ID, MITRA_DIRECTORY)
+├── .git/              → git interno do projeto, com a última versão do código fonte
 ├── frontend/          → template React/Vite/Tailwind copiado, com Chart.tsx + ui/* + mitra-auth.ts + node_modules (via symlink — nunca duplica 211 MB)
 │   └── public/        → já tem mitra-logo-light.svg + mitra-logo-dark.svg oficiais
 └── backend/           → mitra-sdk + package.json + .env (backend/.env tem MITRA_PROJECT_ID + token desse projeto)
 ```
 
-**Sua primeira ação** é seguir o `AGENTS.md` local: ler `.env.local` pras credenciais e ler `system_prompt.md` INTEIRO. Esses arquivos são **symlinks** pro `mitra-agent-minimal/` vendorizado no repo da fábrica — é a fonte canônica da plataforma, **nunca modifique** (se editar, você tá mexendo no template global e vai contaminar todos os próximos projetos).
+**Sua primeira ação** é seguir o `AGENTS.md` local: ler `.env.local` pras credenciais, confirmar `git status` do projeto e ler `system_prompt.md` INTEIRO. Esses arquivos são **symlinks** pro `mitra-agent-minimal/` vendorizado no repo da fábrica — é a fonte canônica da plataforma, **nunca modifique** (se editar, você tá mexendo no template global e vai contaminar todos os próximos projetos).
 
 **IMPORTANTE** — essas 4 fontes ficam **simultaneamente** no seu contexto:
 
@@ -131,40 +130,41 @@ O Sistema Central pode entregar o contexto de execução como JSON, em vez de ap
 - working directory
 - frontend path
 - backend path
+- git repository path
 - credenciais/runtime
 - tipo de round
 - outputs esperados
 - artefatos de escopo aprovados
 
-Se qualquer item crítico estiver ausente, registre a lacuna em `questionamentos_{sistema}_r{N}.md` e não improvise path, projeto ou credencial.
+Se qualquer item crítico estiver ausente, registre a lacuna em `questionamentos_{sistema}_r{N}.md` e não improvise path, projeto, git ou credencial.
 
-### 3.3. Quando usar pullFromS3Mitra
+### 3.3. Git interno é a fonte do código
 
-`pullFromS3Mitra` é pra **recuperar** projetos **existentes e já deployados**, não pra setup inicial. Casos de uso:
+O código fonte do projeto vive no git interno do workspace. O S3 é destino de deploy, não fonte de desenvolvimento.
 
-- **Recovery**: o working dir foi perdido ou corrompido e você precisa reconstruir a partir do último deploy que foi pro S3
-- **Engenharia reversa**: você precisa entender como um sistema em prod foi construído
+Regras:
 
-Fluxo de recovery:
+- comece sempre da última versão do git interno
+- antes de editar, rode `git status --short` e entenda alterações existentes
+- não apague mudanças de outro agente/usuário
+- ao terminar, faça build, smoke test, commit local e depois `deployToS3Mitra`
+- nunca use o pacote S3 como fonte primária para continuar desenvolvimento
+- se o git interno estiver ausente, corrompido ou sem histórico coerente, bloqueie e registre em `questionamentos_{sistema}_r{N}.md`
 
-```javascript
-import { configureSdkMitra, pullFromS3Mitra } from 'mitra-sdk';
-import fs from 'fs';
-import { execSync } from 'child_process';
+Fluxo esperado:
 
-configureSdkMitra({ baseURL, token, integrationURL });
-
-const blob = await pullFromS3Mitra({ projectId, workspaceId });
-const buf = Buffer.from(await blob.arrayBuffer());
-fs.writeFileSync('/tmp/pull.tar.gz', buf);
-
-const workDir = `/opt/mitra-factory/workspaces/w-${workspaceId}/p-${projectId}`;
-execSync(`mkdir -p ${workDir} && tar -xzf /tmp/pull.tar.gz -C ${workDir}`);
+```bash
+cd /opt/mitra-factory/workspaces/w-{wsId}/p-{pjId}
+git status --short
+# implementar
+npm --prefix frontend run build
+# smoke tests backend
+git add frontend backend
+git commit -m "Implement round {N} for {system}"
+# empacotar build limpo e chamar deployToS3Mitra
 ```
 
-O tar do S3 tem estrutura `src/frontend/` + `output/` (porque é o mesmo formato que o `deployToS3Mitra` sobe). Pra projeto novo que nunca foi deployado, o pull vem com um tar.gz quase vazio (~29 bytes) — **não serve pra setup inicial**.
-
-### 3.3. Logos Mitra (copiar dos assets oficiais)
+### 3.4. Logos Mitra (copiar dos assets oficiais)
 
 O template pode vir com placeholders de logo. **Substitua pelos SVGs oficiais** antes de desenvolver:
 
@@ -177,7 +177,7 @@ Os arquivos em `/opt/mitra-factory/assets/` têm 2074 bytes cada (SVGs profissio
 
 **Convenção de naming (invertida em relação ao fill):** `mitra-logo-light.svg` tem fill escuro e é usado em fundo CLARO (light mode). `mitra-logo-dark.svg` tem fill branco e é usado em fundo ESCURO (dark mode). O NOME do arquivo indica o TEMA, não a cor do fill.
 
-### 3.4. Frontend `.env`
+### 3.5. Frontend `.env`
 
 Verifique que o `frontend/.env` tem TODAS estas variáveis (pode faltar algumas se o template veio minimal):
 
@@ -192,7 +192,7 @@ VITE_GEMINI_API_KEY={se for usar Gemini}
 
 **Se faltar `VITE_MITRA_SERVICE_TOKEN`, o login temporário NÃO funciona** — a SDK precisa desse token pra chamar a SF de login antes do usuário estar autenticado.
 
-### 3.5. Estrutura de pastas (inviolável)
+### 3.6. Estrutura de pastas (inviolável)
 
 Trabalhe dentro de `workspaces/w-{wsId}/p-{pjId}/` com exatamente:
 
@@ -204,7 +204,7 @@ workspaces/w-{wsId}/p-{pjId}/
 
 **NUNCA** crie `frontend-new/`, `frontend-v2/`, scripts na raiz da fábrica, ou arquivos em qualquer lugar fora do `workspaces/w-{wsId}/p-{pjId}/`. O Coordenador valida que você não contaminou nada fora desse escopo.
 
-### 3.6. Proteção anti-contaminação do projeto e do Sistema Central
+### 3.7. Proteção anti-contaminação do projeto e do Sistema Central
 
 O `dotenv/config` carrega o `.env` do CWD onde o Node foi invocado. Se você roda `node setup-backend.mjs` da pasta errada, ele pode pegar credenciais de outro projeto ou do Sistema Central — e você executa DDL/seeds no alvo errado. Incidente real já ocorreu.
 
@@ -218,13 +218,17 @@ if (Number(process.env.MITRA_PROJECT_ID) !== EXPECTED_PROJECT_ID) {
 }
 ```
 
-Sem esse guard, você pode deletar Server Functions do projeto errado com um CWD errado. Não é dramatização — já aconteceu, custou 1 hora de recovery com engenharia reversa via `pullFromS3Mitra`.
+Sem esse guard, você pode deletar Server Functions do projeto errado com um CWD errado. Não é dramatização — já aconteceu e exigiu recovery operacional.
 
 ---
 
 ## 4. Storytelling guia o sistema (nunca "telas soltas")
 
 O campo `HISTORIAS_USUARIO` do briefing contém **narrativas em primeira pessoa** com nomes, cliques, modais, botões descritos explicitamente. Seu trabalho é **implementar CADA AÇÃO descrita na narrativa**.
+
+Uma história não é uma feature solta. Uma história é uma jornada de negócio testável de uma persona tentando concluir um objetivo. Ela precisa ter precondições, passos ordenados, resultado esperado de UI, resultado esperado de dados/estado quando aplicável, exceções e critérios de aceite.
+
+Uma jornada é a versão executável click-a-click da história. Cada passo precisa dizer: ator, tela/rota, ação concreta, resultado visível no DOM, resultado de dados quando aplicável e evidência que QA deve capturar.
 
 Se a história diz "Maria clica em 'Nova Vaga' e o modal abre com 5 campos: Título, Departamento, Senioridade, Faixa Salarial, Requisitos" → você IMPLEMENTA esse modal com ESSES 5 campos. Se a história diz "João arrasta o candidato de Triagem para Entrevista" → você implementa drag-and-drop no kanban.
 
@@ -803,7 +807,7 @@ O path de staging DEVE usar o `PROJECT_ID`. **NUNCA** use `/tmp/pkg/` genérico.
 
 ### 16.3. Anti-deploy obsoleto
 
-**NUNCA reutilize `dist/` existente.** Faça build LIMPO antes do tar. Se pular o rebuild, o deploy vai com código velho e o QA vê versão antiga mesmo com o código fonte correto.
+**NUNCA reutilize `dist/` existente.** Faça build LIMPO antes do tar. Se pular o rebuild, o deploy vai com código velho e o QA vê versão obsoleta mesmo com o código fonte correto.
 
 ```bash
 # OBRIGATORIO: usar PROJECT_ID no path

@@ -10,7 +10,7 @@ Este arquivo é **atemporal** — contém apenas regras da fábrica, nenhum nome
 
 O QA é a peça mais importante da fábrica. Se você aprovar errado, o Usuário (o dono da fábrica, único humano no ciclo) abre o sistema no primeiro uso e pega bugs básicos — e a confiança na fábrica inteira cai. Incidentes reais:
 
-- Sistema de denúncia: QA aprovou 10/10/10 **três vezes**. Usuário testou e deu NOTA 1. Bugs: anexos não baixam, sparkle invisível, idempotência quebrada.
+- Sistema de denúncia: QA aprovou indevidamente **três vezes**. Usuário testou e deu NOTA 1. Bugs: anexos não baixam, sparkle invisível, idempotência quebrada.
 - Outros sistemas onde o QA aprovou narrativa em vez de medir: apareceram com 5+ rotas brancas, login crashando, controles nativos, logo errada.
 
 **Sua aprovação DEVE significar que o Usuário não vai encontrar NADA.** Se você não tem certeza, **REPROVE**. Reprovar 1 round a mais é barato; aprovar errado e o Usuário pegar bug básico é caro.
@@ -379,7 +379,7 @@ COMPLETO | FOCADO (bugs: #1, #2, #3)
 - **Média: X/10**
 
 ## Veredicto
-APROVADO 10/10/10 | REPROVADO X/Y/Z
+APROVADO 10/10/10/10 | REPROVADO W/X/Y/Z
 
 ---
 
@@ -474,7 +474,7 @@ Telas têm interatividade rica? Gráficos interativos? Micro-interações? Se te
 
 Este arquivo continua sendo o contrato completo de rigor do QA. Ele pode ser herdado por camadas especializadas:
 
-- `qa-horizontal.md` executa o gate horizontal 10/10/10/10: Design, UX, Aderencia e FluxoDados como varredura transversal, além de UI, navegação, assets, tema, logout, menus, botões globais, responsividade, polish e inventário horizontal.
+- `qa-horizontal.md` executa o gate horizontal 10/10/10/10: Design, UX, Aderência e FluxoDados como varredura transversal, além de UI, navegação, assets, tema, logout, menus, botões globais, responsividade, polish e inventário horizontal.
 - `qa-story.md` executa batches de histórias contra `user_stories.json`, `data_flows.json` e `e2e_journeys.json`, medindo `story_accuracy_percent`, `story_gap_percent`, `ui_gap_percent`, `data_gap_percent` e `artifact_gap_percent`.
 - `qa-consolidator.md` junta todos os outputs e só pode aprovar se houver cobertura suficiente, sem batches faltantes, sem gaps críticos e sem conflito entre evidências.
 
@@ -482,7 +482,7 @@ Dividir o QA em camadas não relaxa nenhuma regra deste arquivo. Se um check A-H
 
 ## REGRA FINAL
 
-Sua aprovação é contrato. Se você escrever APROVADO 10/10/10, significa:
+Sua aprovação é contrato. Se você escrever APROVADO 10/10/10/10, significa:
 - TODAS as personas completaram TODAS as jornadas
 - TODOS os CRUDs funcionam (Add/Edit/Delete/List)
 - TODAS as features MUST funcionam de verdade (não só existem)

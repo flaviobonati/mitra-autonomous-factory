@@ -24,6 +24,7 @@
     "artifact_gap_percent",
     "expected_steps_count",
     "executed_steps_count",
+    "step_results",
     "stopped_early",
     "stop_reason",
     "ui_evidence",
@@ -74,6 +75,10 @@
     "artifact_gap_percent": { "type": "number", "minimum": 0, "maximum": 100 },
     "expected_steps_count": { "type": "integer", "minimum": 0 },
     "executed_steps_count": { "type": "integer", "minimum": 0 },
+    "step_results": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/step_result" }
+    },
     "stopped_early": { "type": "boolean" },
     "stop_reason": { "type": "string" },
     "ui_evidence": {
@@ -99,6 +104,39 @@
     }
   },
   "$defs": {
+    "step_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "step_index",
+        "expected_action",
+        "actual_action",
+        "ui_expected",
+        "ui_actual",
+        "status"
+      ],
+      "properties": {
+        "step_index": { "type": "integer", "minimum": 1 },
+        "actor": { "type": "string" },
+        "route_or_screen": { "type": "string" },
+        "expected_action": { "type": "string" },
+        "actual_action": { "type": "string" },
+        "ui_expected": { "type": "string" },
+        "ui_actual": { "type": "string" },
+        "data_expected": { "type": "string" },
+        "data_actual": { "type": "string" },
+        "artifact_expected": { "type": "string" },
+        "artifact_actual": { "type": "string" },
+        "evidence_ids": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "status": {
+          "type": "string",
+          "enum": ["passed", "failed", "blocked", "skipped"]
+        }
+      }
+    },
     "evidence": {
       "type": "object",
       "additionalProperties": false,

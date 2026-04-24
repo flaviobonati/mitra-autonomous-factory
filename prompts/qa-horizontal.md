@@ -14,7 +14,7 @@ You do not declare final business-story coverage.
 Validate:
 1. Design as a horizontal score
 2. UX as a horizontal score
-3. Aderencia as horizontal feature/action reality
+3. Aderencia/Aderência as horizontal feature/action reality
 4. FluxoDados as horizontal data-flow risk and smoke evidence
 5. dark/light mode behavior
 6. button inventory and cross-cutting defects

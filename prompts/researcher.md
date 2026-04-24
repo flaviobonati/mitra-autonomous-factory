@@ -112,6 +112,26 @@ Maria volta ao dashboard e clica em "Nova Vaga" para criar a vaga de Product Man
 
 Identifique TODAS as personas — incluindo usuários externos/anônimos se houver.
 
+**DEFINIÇÃO DE HISTÓRIA E JORNADA:**
+
+Uma história é uma jornada de negócio testável de uma persona para concluir um objetivo. Ela não é uma feature solta, nem uma tela, nem uma lista genérica de ações.
+
+Toda história deve ter:
+- `story_id` estável
+- persona e papel
+- objetivo de negócio
+- estado inicial e precondições
+- passos ordenados
+- resultado esperado de UI por passo
+- resultado esperado de dado/estado por passo quando aplicável
+- artefato/output esperado quando aplicável
+- exceções
+- critérios de aceite
+
+Uma jornada é a versão click-a-click executável da história. Cada passo deve dizer quem age, em qual tela/rota, qual ação faz (click, fill, select, upload, drag, submit, wait), o que aparece no DOM, que dado muda e qual evidência o QA deve capturar.
+
+Se o Dev ou o QA tiver que adivinhar o próximo clique, a jornada está incompleta.
+
 **ORDEM OBRIGATÓRIA DAS HISTORIAS DE USUÁRIO:**
 
 ```
