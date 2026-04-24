@@ -2,9 +2,6 @@
 
 This file explains what was intentionally preserved and what was intentionally removed from the earlier prompts while adapting them to the new factory model.
 
-The files in `prompts/base/` remain as historical references for migration review.
-They are not canonical prompts for execution.
-
 ## General Rule
 
 The previous prompts were not discarded because they were weak.
@@ -75,7 +72,7 @@ Reason:
 
 ## What This Means Practically
 
-The old prompts are reference material with real lessons.
+The older prompts are reference material with real lessons.
 The new prompts must inherit their rigor, but not blindly inherit their exact structure.
 
 If a rule from the older prompts is still valid in the new execution model, it should be preserved.
