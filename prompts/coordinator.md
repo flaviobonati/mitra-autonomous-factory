@@ -353,7 +353,7 @@ O Coordenador só inicia Development quando o escopo aprovado existe no Sistema 
 
 Input mínimo para Dev:
 
-- prompt completo do Dev
+- `prompts/dev.md` completo, copiado ou concatenado no pacote de missão do Dev
 - prompt nativo Mitra ou referência obrigatória de leitura
 - artefatos de escopo aprovados
 - `development_mission.json` ou pacote equivalente
@@ -377,11 +377,35 @@ Antes do spawn, o workspace deve conter:
 - `workspaces/w-{wsId}/p-{pjId}/`
 - `AGENTS.md` apontando para o contrato Mitra
 - `system_prompt.md` apontando para o prompt nativo Mitra
+- `dev.md` copiado de `prompts/dev.md` da fábrica ou explicitamente concatenado no pacote de missão
 - `.env.local` com credenciais do projeto
 - `frontend/` iniciado a partir do template oficial
 - `backend/` com SDK e credenciais do projeto
 - assets oficiais Mitra no `frontend/public/`
 - repositório git interno inicializado para o código do projeto
+
+### 9.2 Checklist bloqueante para spawnar Dev
+
+O Coordenador não deve spawnar Claude 4.7 para Dev até completar e registrar este checklist:
+
+1. Carregar do Sistema Central o pacote atual da execução (`execution_id`, `coordinator_bot_id`, fase, round, sistema, workspace, projeto, artefatos aprovados, próxima missão e bloqueios conhecidos).
+2. Validar que a fase permite Development e que o escopo aprovado contém histórias, fluxos de dados, entidades, critérios de aceite e journeys necessárias.
+3. Criar ou recuperar o workspace isolado em `/opt/mitra-factory/workspaces/w-{wsId}/p-{pjId}/`.
+4. Inicializar ou validar o git interno do projeto nesse workspace; se não houver histórico coerente, bloquear antes do spawn.
+5. Preparar arquivos locais do projeto: `frontend/`, `backend/`, `AGENTS.md`, `CLAUDE.md`, `system_prompt.md`, `.env.local`, `.env.example`, assets oficiais Mitra e envs de frontend/backend.
+6. Copiar `prompts/dev.md` para `workspaces/w-{wsId}/p-{pjId}/dev.md` ou concatenar o conteúdo integral de `prompts/dev.md` antes da tarefa específica no pacote de missão. Registrar hash ou commit da versão usada.
+7. Montar `task_dev_{system}_r{N}.md` ou `development_mission.json` com tarefa exata, runtime contract, paths, IDs, artefatos de escopo aprovados, outputs obrigatórios e critérios de bloqueio.
+8. Montar o prompt final do Dev nesta ordem: `dev.md` completo, contexto fixo da execução, contexto do produto, tarefa específica, outputs esperados e instrução explícita para ler `AGENTS.md`, `.env.local` e `system_prompt.md` inteiros antes de codar.
+9. Registrar no Sistema Central os eventos `mission_created` e `agent_spawned`, incluindo modelo esperado `Claude 4.7`, workspace, git commit inicial, caminho do pacote de missão, hash do `dev.md` e log de saída.
+10. Executar Claude 4.7 apenas depois do pacote completo estar gravado em disco. Se o modelo exigido não estiver disponível, bloquear como `blocked_model_unavailable`, sem substituir silenciosamente.
+
+Boundary de segurança para Dev:
+
+- o Dev só pode ler envs do projeto dentro de `workspaces/w-{wsId}/p-{pjId}/`
+- o Dev nunca pode ler `/opt/mitra-factory/.env`, `/opt/mitra-factory/.env.coordinator`, credenciais GitHub, credenciais de Telegram ou envs de outros projetos
+- se o Dev tentar buscar `.env*` fora do workspace do projeto, o Coordenador deve interromper a missão, redigir logs sensíveis e relançar com pacote corrigido
+
+Durante o monitoramento, o Coordenador deve verificar progresso real por log, processo, timestamps de arquivos e git status. Se o agente ficar sem I/O por tempo anormal ou travar em tool call, registre o bloqueio, preserve o log e reinicie apenas com pacote corrigido.
 
 Regra de fonte:
 
