@@ -318,6 +318,8 @@ Regras:
 
 - toda feature MUST precisa aparecer em pelo menos uma história
 - toda feature MUST com dados precisa aparecer em pelo menos um fluxo
+- sempre deve existir ao menos uma história de implantação para cada variação relevante de implantação do produto
+- sempre deve existir ao menos uma história de ingestão de dados para cada fonte ou modo primário de entrada de dados
 - toda jornada precisa apontar para persona e história
 - toda entidade operacional precisa aparecer em entidade, história ou fluxo
 - lacunas devem ser registradas, não escondidas
@@ -333,6 +335,13 @@ Definição de jornada:
 - uma jornada é a versão click-a-click executável de uma ou mais histórias
 - cada passo precisa ter ator, tela/rota, ação, resultado visível no DOM, resultado de dados quando aplicável e evidência esperada
 - se o QA precisa interpretar o que clicar ou como verificar, a jornada está incompleta
+
+Histórias obrigatórias:
+
+- implantação: para cada potencial de variação de implantação, deve haver uma história própria de Implantador/Configurador cobrindo cadastros master, parâmetros, permissões, templates, regras, fontes de dados e setup inicial
+- ingestão de dados: para cada fonte ou modo primário de entrada, deve haver uma história própria cobrindo upload/import/API/webhook/formulário, validação, persistência, transformação e reflexo downstream
+
+Uma variação de implantação é qualquer caminho de setup que muda entidades, parâmetros, permissões, workflows, integrações, cálculos ou estados do ciclo de vida. Se duas empresas usariam configurações estruturalmente diferentes, são duas variações e exigem histórias separadas.
 
 Se escopo estiver incompleto, o Coordenador não deve avançar para Dev.
 

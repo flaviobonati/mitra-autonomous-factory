@@ -146,6 +146,15 @@ Essa ordem é INVIOLÁVEL. O Dev implementa na ordem que lê. Se os usuários fi
 
 Essa persona configura o sistema ANTES de qualquer usuário final usar. A narrativa deve ser um passo a passo completo de implantação que PROPÕE a estrutura das tabelas e entidades.
 
+**História obrigatória de implantação:** sempre escreva pelo menos uma história de implantação. Se o produto tiver variações relevantes de implantação, escreva uma história para CADA variação.
+
+Variação relevante significa qualquer setup que muda entidades, parâmetros, permissões, workflows, integrações, cálculos ou lifecycle. Exemplos:
+- operação single-company vs multi-filial
+- vendas de produtos vs prestação de serviços
+- atendimento email-only vs omnichannel
+- importação manual CSV vs entrada por API/webhook
+- regras de SLA simples vs SLA por contrato/categoria/prioridade
+
 **O que a narrativa do Implantador DEVE cobrir:**
 - Cadastros master passo a passo: CADA entidade de negócio (produtos, grupos, categorias, departamentos, cargos, regiões, indicadores, fórmulas, etc.)
 - Parametrização: variáveis, pesos, thresholds, regras de cálculo, fórmulas
@@ -157,6 +166,22 @@ Essa persona configura o sistema ANTES de qualquer usuário final usar. A narrat
 - Criação de usuários e permissões
 
 **POR QUE:** Sem essa persona, o Dev cria entidades desconexas (SPIFF sem vínculo com produto/grupo, campanha sem indicador real). O sistema fica "bonito mas não serve pra produção". Aconteceu em Comissões e Planejamento Estratégico — 100% do trabalho perdido.
+
+### HISTÓRIA OBRIGATÓRIA DE INGESTÃO DE DADOS
+
+Além das histórias de implantação, sempre escreva pelo menos uma história específica de ingestão de dados para cada fonte ou modo primário de entrada do sistema.
+
+Essa história deve mostrar:
+- de onde o dado vem: CSV, formulário, API, webhook, integração, upload ou dado inicial cadastrado
+- quem dispara a ingestão
+- quais campos entram
+- como o sistema valida erros e duplicidades
+- onde os dados são persistidos
+- que transformação/cálculo acontece
+- onde o usuário vê o resultado downstream
+- qual exceção acontece quando o arquivo/formato/fonte está errado
+
+Se o produto depende de dados para funcionar e a ingestão não tem história própria, a pesquisa está incompleta.
 
 ### PERSONA #2: MANTENEDOR/ADMINISTRADOR (SEGUNDA)
 

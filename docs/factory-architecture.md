@@ -69,6 +69,15 @@ Every story must have:
 - exception paths and failure states
 - acceptance criteria
 
+Mandatory story coverage:
+
+- at least one implantation story for each meaningful implementation variation of the product
+- at least one data-ingestion story for each primary data source or ingestion mode the product depends on
+
+An implementation variation is any setup path that changes required entities, parameters, permissions, workflows, integrations, calculations or lifecycle states. Examples: B2B vs B2C, single-company vs multi-branch, product sales vs services, email-only help desk vs omnichannel support, manual CSV import vs API/webhook intake.
+
+The data-ingestion story must prove how operational data enters the system, is validated, becomes persisted state, and appears downstream in the UI, flows or artifacts.
+
 A journey is the executable click-by-click version of one or more stories. It must be written so QA can reproduce it without interpretation. Each step should describe:
 
 - actor

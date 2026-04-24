@@ -238,11 +238,18 @@ Se a história diz "Maria clica em 'Nova Vaga' e o modal abre com 5 campos: Tít
 
 As histórias vêm em uma ordem específica e é **obrigatório** seguir essa ordem na implementação e no Guia do Testador:
 
-1. **Implantador** — configura o sistema pela primeira vez (wizard de setup, criação de entidades iniciais, importação de dados base)
+1. **Implantador** — configura o sistema pela primeira vez (wizard de setup, criação de entidades iniciais, importação de dados base). Deve existir uma história de implantação para cada variação relevante de setup aprovada.
 2. **Mantenedor** — opera o sistema em regime (CRUDs, ajustes, resolução de exceções, saúde da operação)
 3. **Usuários finais** — consomem o sistema no dia-a-dia (dashboards, ações operacionais, portais)
 
 Essa ordem existe porque o Usuário testa o sistema nessa sequência — primeiro simula a implantação, depois vira o mantenedor, depois cada persona final. Se você pular ou reordenar, o Guia do Testador não bate com a jornada real.
+
+Histórias obrigatórias que você deve procurar no pacote:
+
+- implantação por variação: cada variação relevante de setup deve virar wizard/fluxo testável
+- ingestão de dados: cada fonte ou modo primário de entrada de dados deve ter jornada própria, com validação, persistência, transformação e reflexo downstream
+
+Se essas histórias não vierem no pacote aprovado, registre em `questionamentos_{sistema}_r{N}.md` antes de inventar o escopo.
 
 ### 4.2. Jornada Click-a-Click (entrega obrigatória)
 

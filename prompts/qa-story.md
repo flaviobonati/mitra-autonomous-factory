@@ -27,6 +27,19 @@ A valid story has:
 
 A story is not complete because a screen exists. It is complete only when the persona can execute the journey and the product reaches the expected business state.
 
+## Mandatory Story Types
+
+Each product must include and QA must verify:
+
+- implantation stories: at least one story for each meaningful implementation variation
+- data-ingestion stories: at least one story for each primary data source or ingestion mode
+
+An implementation variation is any setup path that changes entities, parameters, permissions, workflows, integrations, calculations or lifecycle states.
+
+A data-ingestion story must prove that data enters the system, is validated, is persisted, is transformed when needed, and appears downstream in UI, data flows or artifacts.
+
+If the assigned batch omits these mandatory stories, record a coverage gap. If a mandatory story is assigned but cannot prove the full loop, it cannot pass.
+
 ## What A Journey Step Is
 
 Each expected step must be executable by Playwright or verifiable through SDK/database/artifact inspection.
