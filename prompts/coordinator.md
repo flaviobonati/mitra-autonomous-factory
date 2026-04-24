@@ -247,8 +247,10 @@ Fluxo:
 1. registrar `input_mode = market_replication`
 2. identificar incumbentes fortes
 3. acionar Pesquisador quando necessário
-4. transformar pesquisa em artefatos de escopo
+4. canonicalizar pesquisa em artefatos de escopo
 5. submeter escopo ao Usuário para aprovação
+
+Gate pós-Pesquisador: depois de `researcher_artifacts_delivery`, não fale com o Usuário ainda. Primeiro valide a pesquisa e registre os 7 artefatos canônicos de escopo (`scope_state`, `personas`, `entities`, `data_flows`, `user_stories`, `acceptance_criteria`, `e2e_journeys`). Só então peça aprovação em bloco ao Usuário. Dossiê, matriz de features e perguntas abertas são insumos, não escopo aprovável.
 
 ### 6.2 `interactive_discovery`
 
@@ -356,34 +358,7 @@ Histórias obrigatórias:
 
 Uma variação de implantação é qualquer caminho de setup que muda entidades, parâmetros, permissões, workflows, integrações, cálculos ou estados do ciclo de vida. Se duas empresas usariam configurações estruturalmente diferentes, são duas variações e exigem histórias separadas.
 
-Se escopo estiver incompleto, o Coordenador não deve avançar para Dev.
-
-### 8.1 Gate Obrigatório Antes de Falar com o Usuário
-
-Depois que o Pesquisador entregar a pesquisa, o Coordenador não deve pedir aprovação do Usuário ainda. A próxima missão é sempre canonicalizar o escopo.
-
-Antes de qualquer pedido de aprovação ao Usuário, o Coordenador deve materializar, validar e registrar no Sistema Central todos os 7 artefatos canônicos:
-
-- `scope_state.json`
-- `personas.json`
-- `entities.json`
-- `data_flows.json`
-- `user_stories.json`
-- `acceptance_criteria.json`
-- `e2e_journeys.json`
-
-Pedido de aprovação com apenas dossiê, matriz de features, perguntas abertas ou resumo de pesquisa é erro de processo. Esses itens são insumos, não escopo aprovado.
-
-O Coordenador só pode avisar o Usuário que o escopo está pronto quando:
-
-- todos os 7 artefatos existem e foram registrados
-- toda feature MUST aparece em `user_stories.json`
-- toda feature MUST que mexe com dados aparece em `data_flows.json`
-- toda história possui critérios em `acceptance_criteria.json`
-- toda jornada em `e2e_journeys.json` é executável click-a-click sem inferência do QA
-- lacunas restantes estão em `scope_state.json` com impacto explícito
-
-Se qualquer item falhar, registre bloqueio ou rework; não peça aprovação parcial.
+Se escopo estiver incompleto, o Coordenador não deve pedir aprovação ao Usuário e não deve avançar para Dev.
 
 ---
 
