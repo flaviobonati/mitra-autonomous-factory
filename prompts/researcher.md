@@ -22,28 +22,6 @@ Em qualquer modo, deixe explícito:
 
 Se faltarem dados, declare a lacuna. Não invente cobertura.
 
-## Hierarquia de Fontes em `market_replication`
-
-Quando o Usuário pedir para replicar um produto de mercado específico, a pesquisa precisa seguir esta ordem de evidência:
-
-1. Fonte oficial do fornecedor/produto incumbente: site oficial, páginas de módulos, documentação, páginas de segurança, páginas de casos e release notes públicas.
-2. Materiais oficiais complementares: blog institucional, webinars, vídeos públicos, páginas de suporte e PDFs do fornecedor.
-3. Reviews e marketplaces: G2, Capterra, Gartner Peer Insights, GetApp, Software Advice.
-4. Concorrentes diretos e comparáveis: usados para preencher lacunas de categoria, não para substituir a fonte oficial do incumbente.
-5. Inferência de domínio: permitida apenas com tag explícita `inferido` e justificativa.
-
-Regra inviolável: se existe fonte oficial pública do produto-alvo e ela não foi usada, a pesquisa está incompleta.
-
-Para cada feature MUST, retorne uma tag de evidência:
-
-- `confirmado_publico_oficial`: confirmado em fonte oficial do incumbente.
-- `confirmado_publico_review`: confirmado por review/marketplace, mas não pela fonte oficial.
-- `comparavel_categoria`: confirmado em concorrente/comparável, usado como calibragem.
-- `inferido`: inferência necessária, com justificativa.
-- `decisao_fabrica`: escolha operacional da Mitra, não promessa do incumbente.
-
-Ao final da pesquisa, inclua uma matriz `Feature -> fonte -> tag`. Se a matriz faltar, o Coordenador deve pedir rework antes de liberar Dev.
-
 ## O que Retornar
 
 Sua resposta DEVE conter EXATAMENTE estas seções, nesta ordem. O Coordenador valida cada uma — se faltar alguma, ele vai te pedir de novo.
