@@ -159,6 +159,7 @@ Variação relevante significa qualquer setup que muda entidades, parâmetros, p
 - Cadastros master passo a passo: CADA entidade de negócio (produtos, grupos, categorias, departamentos, cargos, regiões, indicadores, fórmulas, etc.)
 - Parametrização: variáveis, pesos, thresholds, regras de cálculo, fórmulas
 - **Vinculação entre entidades** — ex: "Paulo cadastra o Grupo de Produtos 'Linha Premium' com margem mínima 35% e comissão-base 8%. Depois vincula o SPIFF 'Blitz Premium' a esse grupo, usando a margem como variável de cálculo."
+- Para sistemas de metas, OKRs, planejamento, BI, performance ou gestão estratégica: cada meta/indicador precisa permitir parametrizar origem do dado (query SQL/Mitra, tabela, planilha, API, cálculo manual, responsável, frequência, competência, regra de agregação e fallback manual). A história de implantação deve mostrar pelo menos uma meta vindo de query/fonte de dados e outra meta manual ou composta, quando fizer sentido.
 - Configuração de IA/Workers: quais agentes, frequência, que dados alimentam
 - Criação de templates/modelos que os usuários finais vão usar
 - Flexibilidade por tipo de empresa (serviços vs produtos vs logística — as variáveis mudam)
@@ -171,15 +172,19 @@ Variação relevante significa qualquer setup que muda entidades, parâmetros, p
 
 Além das histórias de implantação, sempre escreva pelo menos uma história específica de ingestão de dados para cada fonte ou modo primário de entrada do sistema.
 
+Se o produto opera por ciclos recorrentes (mensal, semanal, safra, competência, fechamento, apuração, forecast, OKR, planejamento estratégico, BI, comissões, financeiro, RH, operações), a ingestão recorrente é OBRIGATÓRIA como história própria. Não basta falar "importar dados" dentro da implantação. Deve existir uma história separada de "Carregamento mensal/recorrente da competência X", executada por Mantenedor/Administrador, cobrindo reprocessamento, duplicidade, correção e reflexo nos painéis downstream.
+
 Essa história deve mostrar:
 - de onde o dado vem: CSV, formulário, API, webhook, integração, upload ou dado inicial cadastrado
 - quem dispara a ingestão
+- qual competência/ciclo/período está sendo carregado quando houver operação recorrente
 - quais campos entram
 - como o sistema valida erros e duplicidades
 - onde os dados são persistidos
 - que transformação/cálculo acontece
 - qual mudança esperada no banco prova que a ingestão funcionou
 - onde o usuário vê o resultado downstream
+- como o sistema trata reenvio do mesmo período, substituição, rollback ou correção parcial quando isso for relevante
 - qual exceção acontece quando o arquivo/formato/fonte está errado
 
 Se o produto depende de dados para funcionar e a ingestão não tem história própria, a pesquisa está incompleta.

@@ -73,10 +73,13 @@ Mandatory story coverage:
 
 - at least one implantation story for each meaningful implementation variation of the product
 - at least one data-ingestion story for each primary data source or ingestion mode the product depends on
+- at least one monthly/recurring-load story when the product operates by period, competency, close, forecast, planning cycle, OKR cycle, BI refresh or any recurring cadence
 
 An implementation variation is any setup path that changes required entities, parameters, permissions, workflows, integrations, calculations or lifecycle states. Examples: B2B vs B2C, single-company vs multi-branch, product sales vs services, email-only help desk vs omnichannel support, manual CSV import vs API/webhook intake.
 
 The data-ingestion story must prove how operational data enters the system, is validated, becomes persisted state, and appears downstream in the UI, flows or artifacts.
+
+For planning, OKR, BI, strategic-management or performance products, implantation must also prove how each goal/indicator is parameterized against a data source: query/table/API/spreadsheet/manual input, aggregation rule, period/frequency, owner, and fallback/manual override.
 
 A journey is the executable click-by-click version of one or more stories. It must be written so QA can reproduce it without interpretation. Each step should describe:
 

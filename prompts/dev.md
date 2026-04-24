@@ -248,6 +248,7 @@ Histórias obrigatórias que você deve procurar no pacote:
 
 - implantação por variação: cada variação relevante de setup deve virar wizard/fluxo testável
 - ingestão de dados: cada fonte ou modo primário de entrada de dados deve ter jornada própria, com validação, persistência, transformação e reflexo downstream
+- carregamento mensal/recorrente: se o produto opera por competência, fechamento, apuração, forecast, planejamento, OKR, BI, comissão, financeiro, RH, logística ou outro ciclo recorrente, deve existir uma história separada para carregar uma nova competência/período, validar duplicidades, corrigir/reprocessar dados, auditar o carregamento e atualizar outputs downstream
 
 Se essas histórias não vierem no pacote aprovado, registre em `questionamentos_{sistema}_r{N}.md` antes de inventar o escopo.
 

@@ -320,6 +320,7 @@ Regras:
 - toda feature MUST com dados precisa aparecer em pelo menos um fluxo
 - sempre deve existir ao menos uma história de implantação para cada variação relevante de implantação do produto
 - sempre deve existir ao menos uma história de ingestão de dados para cada fonte ou modo primário de entrada de dados
+- se o produto opera por competência, fechamento, apuração, forecast, planejamento, OKR, BI, comissão, financeiro, RH, logística ou qualquer ciclo recorrente, sempre deve existir uma história própria de carregamento mensal/recorrente
 - toda jornada precisa apontar para persona e história
 - toda entidade operacional precisa aparecer em entidade, história ou fluxo
 - lacunas devem ser registradas, não escondidas
@@ -340,6 +341,8 @@ Histórias obrigatórias:
 
 - implantação: para cada potencial de variação de implantação, deve haver uma história própria de Implantador/Configurador cobrindo cadastros master, parâmetros, permissões, templates, regras, fontes de dados e setup inicial
 - ingestão de dados: para cada fonte ou modo primário de entrada, deve haver uma história própria cobrindo upload/import/API/webhook/formulário, validação, persistência, transformação e reflexo downstream
+- carregamento mensal/recorrente: quando houver operação por período ou competência, deve haver história própria do Mantenedor/Administrador para carregar uma nova competência, validar duplicidades, corrigir/reprocessar dados, registrar auditoria e atualizar painéis/indicadores downstream
+- metas/indicadores parametrizados: em sistemas de planejamento, OKR, BI, performance ou gestão estratégica, a implantação deve mostrar como cada meta/indicador escolhe fonte de dados, query/tabela/API/planilha, regra de agregação, frequência, competência, responsável e fallback manual
 
 Uma variação de implantação é qualquer caminho de setup que muda entidades, parâmetros, permissões, workflows, integrações, cálculos ou estados do ciclo de vida. Se duas empresas usariam configurações estruturalmente diferentes, são duas variações e exigem histórias separadas.
 

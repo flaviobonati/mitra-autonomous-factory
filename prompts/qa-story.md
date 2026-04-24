@@ -33,10 +33,13 @@ Each product must include and QA must verify:
 
 - implantation stories: at least one story for each meaningful implementation variation
 - data-ingestion stories: at least one story for each primary data source or ingestion mode
+- monthly/recurring-load stories: required when the product operates by month, period, competency, close, forecast, planning cycle, OKR cycle, commission cycle, financial cycle, HR cycle, logistics cycle, BI refresh or any recurring operational cadence
 
 An implementation variation is any setup path that changes entities, parameters, permissions, workflows, integrations, calculations or lifecycle states.
 
 A data-ingestion story must prove that data enters the system, is validated, is persisted, is transformed when needed, and appears downstream in UI, data flows or artifacts.
+
+A monthly/recurring-load story must prove that a new period can be loaded after implementation, duplicate loads are handled, corrections/reprocessing are possible when relevant, audit state is recorded, and downstream indicators/artifacts update for the selected period.
 
 If the assigned batch omits these mandatory stories, record a coverage gap. If a mandatory story is assigned but cannot prove the full loop, it cannot pass.
 
