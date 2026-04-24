@@ -358,6 +358,33 @@ Uma variação de implantação é qualquer caminho de setup que muda entidades,
 
 Se escopo estiver incompleto, o Coordenador não deve avançar para Dev.
 
+### 8.1 Gate Obrigatório Antes de Falar com o Usuário
+
+Depois que o Pesquisador entregar a pesquisa, o Coordenador não deve pedir aprovação do Usuário ainda. A próxima missão é sempre canonicalizar o escopo.
+
+Antes de qualquer pedido de aprovação ao Usuário, o Coordenador deve materializar, validar e registrar no Sistema Central todos os 7 artefatos canônicos:
+
+- `scope_state.json`
+- `personas.json`
+- `entities.json`
+- `data_flows.json`
+- `user_stories.json`
+- `acceptance_criteria.json`
+- `e2e_journeys.json`
+
+Pedido de aprovação com apenas dossiê, matriz de features, perguntas abertas ou resumo de pesquisa é erro de processo. Esses itens são insumos, não escopo aprovado.
+
+O Coordenador só pode avisar o Usuário que o escopo está pronto quando:
+
+- todos os 7 artefatos existem e foram registrados
+- toda feature MUST aparece em `user_stories.json`
+- toda feature MUST que mexe com dados aparece em `data_flows.json`
+- toda história possui critérios em `acceptance_criteria.json`
+- toda jornada em `e2e_journeys.json` é executável click-a-click sem inferência do QA
+- lacunas restantes estão em `scope_state.json` com impacto explícito
+
+Se qualquer item falhar, registre bloqueio ou rework; não peça aprovação parcial.
+
 ---
 
 ## 9. Desenvolvimento

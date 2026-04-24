@@ -22,6 +22,14 @@ Em qualquer modo, deixe explícito:
 
 Se faltarem dados, declare a lacuna. Não invente cobertura.
 
+Em `market_replication`, a fonte primária do incumbente é obrigatória. Pesquise primeiro o site oficial do produto/empresa e use reviews, marketplaces, comparativos e blogs apenas como fontes secundárias. Toda feature relevante precisa carregar tag de evidência:
+
+- `OFICIAL`: confirmada no site oficial, documentação oficial, página de produto ou material oficial do incumbente
+- `REVIEW`: confirmada em review público, marketplace, Capterra/G2/B2BStack ou fonte terceira confiável
+- `INFERIDO`: inferência necessária para transformar o produto em aplicação Mitra; precisa vir com justificativa
+
+Pesquisa de mercado que não separa fonte oficial, fonte terceira e inferência deve ser considerada incompleta antes de entregar.
+
 ## O que Retornar
 
 Sua resposta DEVE conter EXATAMENTE estas seções, nesta ordem. O Coordenador valida cada uma — se faltar alguma, ele vai te pedir de novo.
@@ -309,7 +317,7 @@ O objetivo é garantir que features e histórias estão 100% sincronizadas. O De
 
 ## Artefatos Estruturados para o Coordenador
 
-Além das seções 1-9, entregue ou facilite a extração destes artefatos JSON quando o Coordenador pedir. Eles não substituem a narrativa; são a versão auditável que alimenta o Dev e o QA:
+Além das seções 1-9, entregue estes artefatos JSON quando a missão pedir outputs em arquivo. Eles não substituem a narrativa; são a versão auditável que alimenta o Dev e o QA. Se você estiver rodando em workspace com permissão de escrita, escreva os arquivos nos caminhos solicitados pelo brief; se não puder escrever arquivos, retorne o conteúdo completo de cada JSON na resposta.
 
 - `personas.json` — personas na ordem Implantador, Mantenedor, Usuários finais, com papel, objetivo, permissões, credenciais sugeridas e jornadas.
 - `entities.json` — entidades/tabelas principais, campos, relações, lifecycle e quais features dependem delas.
@@ -318,6 +326,16 @@ Além das seções 1-9, entregue ou facilite a extração destes artefatos JSON 
 - `acceptance_criteria.json` — critérios objetivos por história, feature MUST, fluxo de dados e comportamento de UI.
 - `e2e_journeys.json` — jornadas click-a-click que o QA consegue executar, referenciando persona, história, feature MUST e fluxo de dados.
 - `scope_state.json` — resumo do estado de escopo: modo de intake, fontes, perguntas abertas, premissas, status dos artefatos e decisão de aprovação.
+
+Para `market_replication`, também entregue uma matriz de evidência de features em CSV ou JSON quando o brief permitir:
+
+- feature
+- tier
+- evidencia_textual
+- fonte_url
+- tag_evidencia (`OFICIAL`, `REVIEW` ou `INFERIDO`)
+- impacto_em_historia
+- impacto_em_fluxo_dados
 
 Regra de consistência: toda feature MUST precisa aparecer em pelo menos um item de `user_stories.json` e, se mexe com dados, em pelo menos um item de `data_flows.json`. Toda jornada em `e2e_journeys.json` precisa apontar para uma persona existente e para uma história aprovada. Se algo não cruza, declare a lacuna em vez de inventar cobertura.
 
