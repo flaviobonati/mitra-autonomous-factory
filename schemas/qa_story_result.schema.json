@@ -113,6 +113,7 @@
         "actual_action",
         "ui_expected",
         "ui_actual",
+        "db_check_required",
         "status"
       ],
       "properties": {
@@ -123,6 +124,10 @@
         "actual_action": { "type": "string" },
         "ui_expected": { "type": "string" },
         "ui_actual": { "type": "string" },
+        "db_check_required": { "type": "boolean" },
+        "db_expected_change": { "type": "string" },
+        "db_query_or_check": { "type": "string" },
+        "db_actual_result": { "type": "string" },
         "data_expected": { "type": "string" },
         "data_actual": { "type": "string" },
         "artifact_expected": { "type": "string" },

@@ -228,7 +228,7 @@ O campo `HISTORIAS_USUARIO` do briefing contém **narrativas em primeira pessoa*
 
 Uma história não é uma feature solta. Uma história é uma jornada de negócio testável de uma persona tentando concluir um objetivo. Ela precisa ter precondições, passos ordenados, resultado esperado de UI, resultado esperado de dados/estado quando aplicável, exceções e critérios de aceite.
 
-Uma jornada é a versão executável click-a-click da história. Cada passo precisa dizer: ator, tela/rota, ação concreta, resultado visível no DOM, resultado de dados quando aplicável e evidência que QA deve capturar.
+Uma jornada é a versão executável click-a-click da história. Cada passo precisa dizer: ator, tela/rota, ação concreta, resultado visível no DOM, mudança ou invariância esperada no banco quando aplicável e evidência que QA deve capturar.
 
 Se a história diz "Maria clica em 'Nova Vaga' e o modal abre com 5 campos: Título, Departamento, Senioridade, Faixa Salarial, Requisitos" → você IMPLEMENTA esse modal com ESSES 5 campos. Se a história diz "João arrasta o candidato de Triagem para Entrevista" → você implementa drag-and-drop no kanban.
 

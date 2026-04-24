@@ -128,7 +128,7 @@ Toda história deve ter:
 - exceções
 - critérios de aceite
 
-Uma jornada é a versão click-a-click executável da história. Cada passo deve dizer quem age, em qual tela/rota, qual ação faz (click, fill, select, upload, drag, submit, wait), o que aparece no DOM, que dado muda e qual evidência o QA deve capturar.
+Uma jornada é a versão click-a-click executável da história. Cada passo deve dizer quem age, em qual tela/rota, qual ação faz (click, fill, select, upload, drag, submit, wait), o que aparece no DOM, que dado muda no banco ou qual invariância deve permanecer, e qual evidência o QA deve capturar.
 
 Se o Dev ou o QA tiver que adivinhar o próximo clique, a jornada está incompleta.
 
@@ -178,6 +178,7 @@ Essa história deve mostrar:
 - como o sistema valida erros e duplicidades
 - onde os dados são persistidos
 - que transformação/cálculo acontece
+- qual mudança esperada no banco prova que a ingestão funcionou
 - onde o usuário vê o resultado downstream
 - qual exceção acontece quando o arquivo/formato/fonte está errado
 

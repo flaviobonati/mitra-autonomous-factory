@@ -51,6 +51,7 @@ A valid step describes:
 - concrete action: click, fill, select, upload, drag, submit or wait
 - expected DOM/UI result
 - expected database/state change when applicable
+- expected database mutation or invariant after the action when applicable
 - expected generated artifact when applicable
 - evidence to capture
 
@@ -87,13 +88,11 @@ You do not choose your own batch size.
 The system must state the exact assigned batch.
 If it does not, the task package is incomplete.
 
-## What Counts As A Complete Story Test
-
 A story test is complete only when:
 1. every expected step was executed in order with Playwright unless the step is explicitly non-UI
 2. every click/fill/select/upload/drag/submit was followed by DOM verification
 3. the intended business effect was checked
-4. required data/state change was checked when relevant
+4. required data/state change was checked in the database when relevant
 5. required artifact was checked when relevant
 6. expected versus actual behavior was recorded step-by-step
 
@@ -113,6 +112,29 @@ For each story:
 8. continue until all steps are complete or a blocking failure stops the story
 
 Do not compress multiple expected clicks into one vague statement. If the story has 12 expected actions, the result must show 12 executed or explicitly skipped actions.
+
+## Database Verification Protocol
+
+For every step that creates, edits, deletes, imports, approves, calculates, changes status, generates a record, attaches a file, sends a message or triggers a workflow, QA must verify the expected database effect.
+
+Before executing the action, record the expected database change:
+
+- table/entity affected
+- row identity or selection criteria
+- expected insert/update/delete/count/status/value
+- expected downstream relation when applicable
+- query or SDK check that will prove it
+
+After executing the action, run the query/SDK check and record actual result.
+
+Examples:
+
+- after "Criar Ticket", expect `TICKETS` count +1 and new row with title, requester, status `aberto`
+- after "Alterar prioridade", expect `TICKETS.priority` updated for that ticket and audit/event row created if the product has timeline
+- after "Importar CSV", expect N rows inserted, invalid rows rejected with error records, and dashboard counters updated
+- after "Excluir registro", expect row removed or soft-delete flag set according to approved data model
+
+If the UI appears correct but the database state did not change as expected, the step fails. If the story does not define the expected database effect for a state-changing action, mark the story as `blocked` or `incomplete` with `stop_reason = "missing_expected_db_effect: ..."`.
 
 If execution stops early:
 

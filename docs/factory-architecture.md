@@ -85,6 +85,7 @@ A journey is the executable click-by-click version of one or more stories. It mu
 - action by click, fill, select, upload, drag, submit or wait
 - expected DOM/UI result
 - expected database/state result when applicable
+- expected database mutation or invariant after the action when applicable
 - evidence to capture
 
 If a step cannot be executed or verified, it is not a valid journey step.

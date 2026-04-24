@@ -333,7 +333,7 @@ Definição de história:
 Definição de jornada:
 
 - uma jornada é a versão click-a-click executável de uma ou mais histórias
-- cada passo precisa ter ator, tela/rota, ação, resultado visível no DOM, resultado de dados quando aplicável e evidência esperada
+- cada passo precisa ter ator, tela/rota, ação, resultado visível no DOM, expectativa de mudança ou invariância no banco quando aplicável e evidência esperada
 - se o QA precisa interpretar o que clicar ou como verificar, a jornada está incompleta
 
 Histórias obrigatórias:
