@@ -44,7 +44,7 @@ Preserved:
 - explicit declaration of what was not implemented
 
 Removed or not carried over verbatim:
-- legacy environment/setup instructions that may change in the new control system
+- older environment/setup instructions that still need explicit replacement in the new control system
 - older delivery artifacts that duplicate the approved scope state
 - assumptions tied to the previous factory folder/runtime contract
 

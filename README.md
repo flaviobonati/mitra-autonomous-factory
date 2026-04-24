@@ -19,7 +19,7 @@ Current scope:
 3. No phase is complete without evidence.
 4. Stories are business journeys, not isolated clicks.
 5. QA must measure execution against expected story behavior.
-6. Large QA coverage must be partitioned into small batches.
+6. Large QA coverage must be partitioned into explicit, system-assigned batches.
 
 ## Current Phase Model
 

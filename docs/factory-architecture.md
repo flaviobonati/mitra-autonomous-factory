@@ -61,6 +61,9 @@ Required outputs:
 - `qa_ui_ux_summary.json`
 - `bug_list.json`
 
+Shared rigor:
+- `qa-core.md`
+
 Return rule:
 - if this layer finds a blocking failure, the product can return to Development immediately
 - if this layer passes, the system continues to story validation
@@ -71,6 +74,9 @@ Goal:
 
 Required outputs:
 - `qa_story_results_batch_{NN}.json`
+
+Shared rigor:
+- `qa-core.md`
 
 Batch assignment is deterministic and comes from system state.
 Example:
