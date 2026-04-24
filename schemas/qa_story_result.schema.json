@@ -4,6 +4,10 @@
   "type": "object",
   "additionalProperties": false,
   "required": [
+    "execution_id",
+    "mission_id",
+    "batch_id",
+    "batch_range",
     "story_id",
     "story_title",
     "persona_id",
@@ -30,13 +34,25 @@
     "verdict"
   ],
   "properties": {
-    "story_id": { "type": "string" },
+    "execution_id": { "type": "string", "minLength": 1 },
+    "mission_id": { "type": "string", "minLength": 1 },
+    "batch_id": { "type": "string", "minLength": 1 },
+    "batch_range": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start_index", "end_index"],
+      "properties": {
+        "start_index": { "type": "integer", "minimum": 0 },
+        "end_index": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "story_id": { "type": "string", "minLength": 1 },
     "story_title": { "type": "string" },
-    "persona_id": { "type": "string" },
+    "persona_id": { "type": "string", "minLength": 1 },
     "persona_name": { "type": "string" },
     "story_type": {
       "type": "string",
-      "enum": ["core", "supporting", "admin", "exception"]
+      "enum": ["implantation", "maintenance", "final_user", "supporting", "exception"]
     },
     "priority": {
       "type": "string",
@@ -62,25 +78,60 @@
     "stop_reason": { "type": "string" },
     "ui_evidence": {
       "type": "array",
-      "items": { "type": "string" }
+      "items": { "$ref": "#/$defs/evidence" }
     },
     "data_flow_evidence": {
       "type": "array",
-      "items": { "type": "string" }
+      "items": { "$ref": "#/$defs/evidence" }
     },
     "artifact_evidence": {
       "type": "array",
-      "items": { "type": "string" }
+      "items": { "$ref": "#/$defs/evidence" }
     },
     "bugs_found": {
       "type": "array",
-      "items": { "type": "string" }
+      "items": { "$ref": "#/$defs/bug" }
     },
     "expected_vs_actual_summary": { "type": "string" },
     "verdict": {
       "type": "string",
       "enum": ["passed", "failed", "blocked", "incomplete"]
     }
+  },
+  "$defs": {
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evidence_id", "evidence_type", "summary"],
+      "properties": {
+        "evidence_id": { "type": "string", "minLength": 1 },
+        "evidence_type": {
+          "type": "string",
+          "enum": ["screenshot", "dom_check", "query", "download", "artifact", "log", "note"]
+        },
+        "path": { "type": "string" },
+        "query": { "type": "string" },
+        "result": { "type": "string" },
+        "summary": { "type": "string" }
+      }
+    },
+    "bug": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bug_id", "severity", "description", "reproduction"],
+      "properties": {
+        "bug_id": { "type": "string", "minLength": 1 },
+        "severity": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "critical"]
+        },
+        "description": { "type": "string" },
+        "reproduction": { "type": "string" },
+        "evidence_ids": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
   }
 }
-

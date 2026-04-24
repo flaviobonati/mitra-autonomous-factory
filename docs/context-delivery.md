@@ -1,49 +1,87 @@
 # Gradual Context Delivery
 
-## Position
+Gradual context delivery is a runtime rule of the factory.
 
-Gradual context delivery is correct.
+The Coordinator and sub-agents must receive enough context to make the current decision correctly, but they should not receive unrelated historical material that increases noise and encourages fake continuity.
 
-But "gradual" must never mean "insufficient".
-Each agent must always receive the minimum mandatory context required to make the current decision correctly.
+## Principle
 
-This document is for machine design and orchestration.
-It is not automatically part of the coordinator prompt.
+Gradual never means insufficient.
+
+If an agent cannot safely execute the mission from the provided context packet, the packet is invalid and must be rebuilt from the Central Control System.
 
 ## Context Layers
 
 ### 1. Fixed Layer
+
 Always loaded.
 
 Contains:
-- global factory rules
+
 - persona role contract
-- phase model
+- global factory rules
+- current lifecycle model
 - transition criteria
 - output format rules
+- safety rules
+- applicable prompt file
 
 ### 2. Product Layer
-Loaded from system state.
+
+Loaded from persisted execution state.
 
 Contains:
+
+- `execution_id`
+- `coordinator_bot_id`
 - product identity
+- customer instance identity
 - current phase
 - current round
-- approved artifacts relevant to the current phase
-- critical past findings
+- workspace/project identifiers
+- runtime paths
+- approved artifacts relevant to the phase
+- critical timeline events
+- user decisions
+- known blockers
 
 ### 3. Task Layer
+
 Specific to the current mission.
 
 Contains:
+
+- `mission_id`
 - exact task
-- exact expected output
+- exact assigned scope
+- inputs
+- required outputs
+- required evidence
 - constraints
 - blocking risks
-- required evidence
+- done criteria
+- next transition criteria
 
-## Rule
+## Assembly Rule
 
-If an agent lacks enough context to safely decide, the system failed context assembly.
-The fix is not "let the agent improvise".
-The fix is to improve context packaging.
+The Central Control System assembles context packets. The Coordinator validates them before acting.
+
+If required fields are missing:
+
+1. mark the mission as blocked
+2. record the missing fields
+3. ask the Central Control System or user for the missing information when appropriate
+4. do not delegate
+5. do not improvise
+
+## Anti-Pattern
+
+Do not replace missing context with:
+
+- conversation memory
+- guesses
+- summaries from prior turns
+- assumptions about previous projects
+- agent confidence
+
+The fix for missing context is better context packaging, not more improvisation.

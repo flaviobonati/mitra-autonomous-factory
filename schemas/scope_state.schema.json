@@ -4,37 +4,110 @@
   "type": "object",
   "additionalProperties": false,
   "required": [
+    "execution_id",
+    "coordinator_bot_id",
+    "system_name",
     "input_mode",
     "source_refs",
     "market_reference_required",
     "open_questions",
     "assumptions",
+    "artifact_refs",
     "scope_status",
     "approved_by_user"
   ],
   "properties": {
+    "execution_id": { "type": "string", "minLength": 1 },
+    "coordinator_bot_id": { "type": "string", "minLength": 1 },
+    "system_name": { "type": "string", "minLength": 1 },
     "input_mode": {
       "type": "string",
       "enum": ["market_replication", "interactive_discovery", "document_driven"]
     },
     "source_refs": {
       "type": "array",
-      "items": { "type": "string" }
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["source_id", "source_type", "description"],
+        "properties": {
+          "source_id": { "type": "string", "minLength": 1 },
+          "source_type": {
+            "type": "string",
+            "enum": ["user_message", "document", "url", "market_reference", "manual_note"]
+          },
+          "uri": { "type": "string" },
+          "description": { "type": "string" }
+        }
+      }
     },
     "market_reference_required": { "type": "boolean" },
     "open_questions": {
       "type": "array",
-      "items": { "type": "string" }
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["question_id", "question", "status"],
+        "properties": {
+          "question_id": { "type": "string", "minLength": 1 },
+          "question": { "type": "string" },
+          "status": {
+            "type": "string",
+            "enum": ["open", "answered", "deferred", "blocked"]
+          },
+          "owner": {
+            "type": "string",
+            "enum": ["user", "coordinator", "researcher", "system"]
+          }
+        }
+      }
     },
     "assumptions": {
       "type": "array",
-      "items": { "type": "string" }
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["assumption_id", "text", "risk_level"],
+        "properties": {
+          "assumption_id": { "type": "string", "minLength": 1 },
+          "text": { "type": "string" },
+          "risk_level": {
+            "type": "string",
+            "enum": ["low", "medium", "high", "critical"]
+          },
+          "validated": { "type": "boolean" }
+        }
+      }
+    },
+    "artifact_refs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "personas",
+        "entities",
+        "data_flows",
+        "user_stories",
+        "acceptance_criteria",
+        "e2e_journeys"
+      ],
+      "properties": {
+        "personas": { "type": "string" },
+        "entities": { "type": "string" },
+        "data_flows": { "type": "string" },
+        "user_stories": { "type": "string" },
+        "acceptance_criteria": { "type": "string" },
+        "e2e_journeys": { "type": "string" },
+        "business_rules": { "type": "string" },
+        "edge_cases": { "type": "string" },
+        "non_functional_requirements": { "type": "string" }
+      }
     },
     "scope_status": {
       "type": "string",
-      "enum": ["drafting", "awaiting_user_validation", "approved"]
+      "enum": ["drafting", "needs_revision", "blocked", "ready_for_approval", "approved"]
     },
-    "approved_by_user": { "type": "boolean" }
+    "approved_by_user": { "type": "boolean" },
+    "approved_by": { "type": "string" },
+    "approved_at": { "type": "string", "format": "date-time" }
   }
 }
-

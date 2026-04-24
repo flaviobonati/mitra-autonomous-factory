@@ -18,7 +18,7 @@ Current scope:
 2. The user talks only to the coordinator.
 3. No phase is complete without evidence.
 4. Stories are business journeys, not isolated clicks.
-5. QA must measure execution against expected story behavior.
+5. QA Horizontal owns the 10/10/10/10 quality gate.
 6. Large QA coverage must be partitioned into explicit, system-assigned batches.
 
 ## Current Phase Model

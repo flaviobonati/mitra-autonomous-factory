@@ -4,6 +4,8 @@
   "type": "object",
   "additionalProperties": false,
   "required": [
+    "execution_id",
+    "mission_id",
     "design_score",
     "ux_score",
     "adherence_score",
@@ -15,11 +17,17 @@
     "data_gaps",
     "artifact_gaps",
     "approved",
+    "horizontal_status",
+    "story_batch_status",
+    "missing_batches",
+    "uncovered_stories",
     "failed_stories",
     "failed_flows",
     "bugs_found"
   ],
   "properties": {
+    "execution_id": { "type": "string", "minLength": 1 },
+    "mission_id": { "type": "string", "minLength": 1 },
     "design_score": { "type": "number", "minimum": 0, "maximum": 10 },
     "ux_score": { "type": "number", "minimum": 0, "maximum": 10 },
     "adherence_score": { "type": "number", "minimum": 0, "maximum": 10 },
@@ -28,32 +36,117 @@
     "gap_percent": { "type": "number", "minimum": 0, "maximum": 100 },
     "story_gaps": {
       "type": "array",
-      "items": { "type": "string" }
+      "items": { "$ref": "#/$defs/gap" }
     },
     "ui_gaps": {
       "type": "array",
-      "items": { "type": "string" }
+      "items": { "$ref": "#/$defs/gap" }
     },
     "data_gaps": {
       "type": "array",
-      "items": { "type": "string" }
+      "items": { "$ref": "#/$defs/gap" }
     },
     "artifact_gaps": {
       "type": "array",
-      "items": { "type": "string" }
+      "items": { "$ref": "#/$defs/gap" }
     },
     "approved": { "type": "boolean" },
-    "failed_stories": {
+    "horizontal_status": {
+      "type": "string",
+      "enum": ["not_run", "passed", "failed", "blocked", "incomplete"]
+    },
+    "story_batch_status": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["batch_id", "status"],
+        "properties": {
+          "batch_id": { "type": "string", "minLength": 1 },
+          "status": {
+            "type": "string",
+            "enum": ["not_run", "passed", "failed", "blocked", "incomplete"]
+          },
+          "stories_total": { "type": "integer", "minimum": 0 },
+          "stories_passed": { "type": "integer", "minimum": 0 },
+          "stories_failed": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "missing_batches": {
       "type": "array",
       "items": { "type": "string" }
+    },
+    "uncovered_stories": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "failed_stories": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["story_id", "reason"],
+        "properties": {
+          "story_id": { "type": "string", "minLength": 1 },
+          "reason": { "type": "string" },
+          "batch_id": { "type": "string" }
+        }
+      }
     },
     "failed_flows": {
       "type": "array",
-      "items": { "type": "string" }
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["flow_id", "reason"],
+        "properties": {
+          "flow_id": { "type": "string", "minLength": 1 },
+          "reason": { "type": "string" },
+          "related_story_id": { "type": "string" }
+        }
+      }
     },
     "bugs_found": {
       "type": "array",
-      "items": { "type": "string" }
+      "items": { "$ref": "#/$defs/bug" }
+    }
+  },
+  "$defs": {
+    "gap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["gap_id", "severity", "description"],
+      "properties": {
+        "gap_id": { "type": "string", "minLength": 1 },
+        "severity": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "critical"]
+        },
+        "description": { "type": "string" },
+        "related_story_id": { "type": "string" },
+        "related_flow_id": { "type": "string" },
+        "evidence": { "type": "string" }
+      }
+    },
+    "bug": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bug_id", "severity", "description", "source_layer"],
+      "properties": {
+        "bug_id": { "type": "string", "minLength": 1 },
+        "severity": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "critical"]
+        },
+        "description": { "type": "string" },
+        "source_layer": {
+          "type": "string",
+          "enum": ["horizontal", "story", "consolidation"]
+        },
+        "reproduction": { "type": "string" },
+        "evidence": { "type": "string" }
+      }
     }
   }
 }

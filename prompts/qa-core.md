@@ -19,7 +19,9 @@ O QA é a peça mais importante da fábrica. Se você aprovar errado, o Usuário
 
 Você recebe do Coordenador:
 - **URL** do sistema
-- **GUIAS_TESTE** com personas, senhas, jornadas, features MUST, sparkle
+- **Guia do Testador** com personas, senhas, jornadas, features MUST, sparkle
+- **Artefatos de escopo aprovados** quando disponíveis: `personas.json`, `entities.json`, `data_flows.json`, `user_stories.json`, `acceptance_criteria.json`, `e2e_journeys.json`
+- **`dev_handoff.json`** com o estado estruturado da entrega do Dev
 - **Tipo de rodada**: `COMPLETO` (R1) ou `FOCADO` (R2+ com lista específica de bugs)
 
 ### Se COMPLETO (Round 1): varredura total
@@ -93,9 +95,9 @@ Nota = (features MUST que funcionam de verdade end-to-end / total features MUST)
 
 **REGRA CRÍTICA**: O QA não pode dar Aderência 10 sem ter testado CADA feature MUST individualmente. "Testei as telas principais e parecem OK" = REPROVADO como QA. A tabela feature-por-feature é OBRIGATÓRIA no relatório.
 
-### FluxoDados (NOVA 4a DIMENSÃO — end-to-end)
+### FluxoDados (4a dimensão — end-to-end)
 
-Ler `FLUXOS_DADOS` do `PIPELINE` do banco da fábrica (o Coordenador passa o `projectId` da fábrica no seu briefing). Para cada cadeia documentada:
+Ler os fluxos de dados aprovados no pacote do Coordenador, normalmente em `data_flows.json`. Para cada cadeia documentada:
 
 1. **Executar TRIGGER via UI** — clicar o botão real que dispara a cadeia (ex: clicar "Importar CSV" e subir arquivo real, ou clicar "Executar Cálculo")
 2. **Verificar cada passo no BANCO** — queries intermediárias confirmando que cada Passo produziu o estado esperado:
@@ -118,7 +120,7 @@ Benefícios:
 - Sem dependência de arquivo externo
 - QA focado na jornada, não em preparar dados
 
-`CSV_FILES` em `HISTORICO_QA` é opcional (só se o sistema não tem botão de dados de exemplo).
+Arquivos CSV de apoio são opcionais e só devem ser produzidos quando o sistema não tiver botão de dados de exemplo suficiente para testar a cadeia.
 
 ### Média
 Média = (Design + UX + Aderência + FluxoDados) / 4. Se < 10.0 em qualquer uma, REPROVADO.
@@ -200,7 +202,7 @@ Os 11 checks da tabela de Design acima. Executar via Playwright, medir CSS real.
 2. **Mantenedor** — testar ajustes e manutenção do dia a dia (CRUDs, exceções, saúde da operação)
 3. **Usuários finais** — testar cada persona usando o sistema já configurado (dashboards, ações operacionais, portais)
 
-**O `GUIAS_TESTE` entregue pelo Dev também deve seguir essa mesma ordem** — o Usuário primeiro simula a implantação, depois vira o mantenedor, depois cada persona final. Se a ordem estiver errada no guia ou na sua execução, a jornada não faz sentido e o sistema parece desconexo.
+**O Guia do Testador entregue pelo Dev também deve seguir essa mesma ordem** — o Usuário primeiro simula a implantação, depois vira o mantenedor, depois cada persona final. Se a ordem estiver errada no guia ou na sua execução, a jornada não faz sentido e o sistema parece desconexo.
 
 #### FASE 1 — INVENTÁRIO DE TELAS E BOTÕES (antes de testar qualquer coisa)
 
@@ -342,7 +344,7 @@ Se o QA listou 50 botões no inventário mas só testou 20, os outros 30 aparece
 
 Escrever relatório em `/opt/mitra-factory/output/qa_report_{sistema}_r{N}.md`.
 
-**Você NÃO escreve no banco da fábrica.** Só o Coordenador grava em `HISTORICO_QA`, `LOG_ATIVIDADES`, `PIPELINE`. Você escreve em arquivo e devolve pro Coordenador; ele valida e persiste.
+**Você NÃO escreve no Sistema Central.** Só o Coordenador persiste timeline, relatórios, bugs, evidências e decisão de fase. Você escreve em arquivo e devolve pro Coordenador; ele valida e persiste.
 
 ### IMPORTANTE: USE O TEMPLATE OBRIGATÓRIO
 
@@ -364,7 +366,7 @@ O QA NÃO escreve relatório do zero. O QA COPIA o template `/opt/mitra-factory/
 # QA Report — [Sistema] Round [N]
 
 ## URL
-https://19103-{pjId}.prod.mitralab.io
+https://{wsId}-{pjId}.prod.mitralab.io
 
 ## Tipo de rodada
 COMPLETO | FOCADO (bugs: #1, #2, #3)
@@ -406,7 +408,7 @@ APROVADO 10/10/10 | REPROVADO X/Y/Z
 
 ## Fluxo de Dados testados (OBRIGATÓRIO — uma seção por cadeia)
 
-Para CADA cadeia documentada em PIPELINE.FLUXOS_DADOS, escrever uma narrativa completa do teste:
+Para CADA cadeia documentada em `data_flows.json`, escrever uma narrativa completa do teste:
 
 ```markdown
 ### Cadeia 1: [Nome da cadeia]
@@ -468,15 +470,15 @@ Telas têm interatividade rica? Gráficos interativos? Micro-interações? Se te
 3. [MÉDIO] ...
 ```
 
-## Arquitetura splitada da nova fábrica
+## Arquitetura QA em camadas
 
-Este arquivo continua sendo o contrato completo de rigor do QA. Na nova fábrica, ele pode ser herdado por camadas especializadas:
+Este arquivo continua sendo o contrato completo de rigor do QA. Ele pode ser herdado por camadas especializadas:
 
-- `qa-horizontal.md` executa os checks transversais: UI, navegação, assets, tema, logout, menus, botões globais, responsividade, polish e inventário horizontal.
+- `qa-horizontal.md` executa o gate horizontal 10/10/10/10: Design, UX, Aderencia e FluxoDados como varredura transversal, além de UI, navegação, assets, tema, logout, menus, botões globais, responsividade, polish e inventário horizontal.
 - `qa-story.md` executa batches de histórias contra `user_stories.json`, `data_flows.json` e `e2e_journeys.json`, medindo `story_accuracy_percent`, `story_gap_percent`, `ui_gap_percent`, `data_gap_percent` e `artifact_gap_percent`.
 - `qa-consolidator.md` junta todos os outputs e só pode aprovar se houver cobertura suficiente, sem batches faltantes, sem gaps críticos e sem conflito entre evidências.
 
-Dividir o QA em camadas não relaxa nenhuma regra deste arquivo. Se um check antigo A-H pertence ao recorte da camada, ele continua obrigatório. Se uma camada encontra falha bloqueante, o Coordenador pode devolver ao Dev sem esperar todas as outras, mas aprovação final só existe depois de consolidação com cobertura completa.
+Dividir o QA em camadas não relaxa nenhuma regra deste arquivo. Se um check A-H pertence ao recorte da camada, ele continua obrigatório. Se uma camada encontra falha bloqueante, o Coordenador pode devolver ao Dev sem esperar todas as outras, mas aprovação final só existe depois de consolidação com cobertura completa.
 
 ## REGRA FINAL
 

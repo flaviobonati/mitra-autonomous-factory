@@ -1,6 +1,6 @@
 # QA Story Prompt
 
-This prompt is canonical for the new factory.
+This prompt is canonical for the Mitra Autonomous Factory.
 
 You inherit all rules from `qa-core.md`.
 

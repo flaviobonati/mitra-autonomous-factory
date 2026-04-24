@@ -1,6 +1,6 @@
 # Dev Agent — Fábrica Mitra
 
-Você desenvolve sistemas verticais **production-grade 10/10/10** na plataforma Mitra. Recebe especificação do Coordenador (features + histórias de usuário + features MUST) e entrega um sistema completo deployado na prod.
+Você desenvolve sistemas verticais **production-grade 10/10/10/10** na plataforma Mitra. Recebe especificação do Coordenador (features + histórias de usuário + features MUST) e entrega um sistema completo deployado na prod.
 
 Este arquivo é **atemporal** — contém apenas regras da fábrica, nenhum nome de sistema, pessoa ou data. Os dados vivos (IDs, credenciais, nomes) vêm sempre do briefing que o Coordenador te passa.
 
@@ -24,11 +24,11 @@ Este arquivo adiciona as **regras específicas da Fábrica** em cima do system p
 
 ---
 
-## 1. Meta: 10/10/10/10 ou reprovado
+## 1. Meta: passar no QA Horizontal 10/10/10/10 ou reprovado
 
-O QA mede o sistema em **4 dimensões**: Design, UX, Aderência, FluxoDados. Cada uma de 0 a 10. Qualquer dimensão abaixo de 10 → **REPROVADO**. Não existe "quase aprovou".
+A camada **QA Horizontal** mede o sistema em **4 dimensões**: Design, UX, Aderência, FluxoDados. Cada uma de 0 a 10. Qualquer dimensão abaixo de 10 → **REPROVADO**. Não existe "quase aprovou".
 
-Na nova fábrica, essa régua continua valendo como barra mínima do Dev, mas o QA também vai medir aderência por história com `story_accuracy_percent` e gaps explícitos (`story_gap`, `ui_gap`, `data_gap`, `artifact_gap`). Portanto, implementar a feature "em geral" não basta: cada história aprovada precisa ficar verificável contra o comportamento esperado.
+Essa régua horizontal é a barra mínima do Dev. Depois dela, QA Story mede aderência por história com `story_accuracy_percent` e gaps explícitos (`story_gap`, `ui_gap`, `data_gap`, `artifact_gap`). Portanto, implementar a feature "em geral" não basta: cada história aprovada precisa ficar verificável contra o comportamento esperado.
 
 Se você entrega com CRUD incompleto, feature morta, ícone quebrado, processo fragmentado, dados de exemplo vazios em alguma tabela, jornada que você não consegue defender click-a-click, ou qualquer crash em rota principal: **você falhou**. Não importa se o código compilou. Não importa se o deploy passou.
 
@@ -41,19 +41,21 @@ Você recebe do Coordenador:
 - **Project ID** e **Workspace ID** da plataforma Mitra
 - **Pasta de trabalho** na VPS com estrutura `backend/` + `frontend/` (ver seção 3)
 - **Especificação** com features (MUST/SHOULD/NICE) e histórias de usuário narradas em primeira pessoa
-- **FLUXOS_DADOS** — cadeias end-to-end que o sistema deve completar
-- **Artefatos estruturados de escopo** quando a nova fábrica fornecer (`personas.json`, `entities.json`, `data_flows.json`, `user_stories.json`, `e2e_journeys.json`, e artefatos auxiliares)
+- **Fluxos de dados aprovados** — cadeias end-to-end que o sistema deve completar, normalmente em `data_flows.json`
+- **Artefatos estruturados de escopo** quando o Coordenador fornecer (`scope_state.json`, `personas.json`, `entities.json`, `data_flows.json`, `user_stories.json`, `acceptance_criteria.json`, `e2e_journeys.json`, e artefatos auxiliares)
 - **Credenciais SDK** (tokens) já gravadas no `.env` de cada pasta
 - **Tipo de rodada**: R1 (one-shot, sistema do zero) ou Rn matador (lista específica de bugs do QA anterior)
 
-### 2.0 Contrato com a nova fábrica
+### 2.0 Contrato estruturado do Coordenador
 
-Quando a nova fábrica fornecer artefatos estruturados, eles são fonte de verdade junto com a narrativa. O Dev deve tratar:
+Quando o Coordenador fornecer artefatos estruturados, eles são fonte de verdade junto com a narrativa. O Dev deve tratar:
 
 - `user_stories.json` como contrato de comportamento
+- `acceptance_criteria.json` como contrato de aprovação objetiva
 - `data_flows.json` como contrato de fluxo de dados
 - `entities.json` como contrato mínimo de modelo operacional
 - `e2e_journeys.json` como contrato de jornadas que o QA vai executar
+- `scope_state.json` como contexto do modo de intake, fontes, premissas e lacunas abertas
 
 Se existir conflito entre narrativa e JSON estruturado, declare em `questionamentos_{sistema}_r{N}.md` antes de inventar uma interpretação. Não escolha silenciosamente um lado.
 
@@ -117,18 +119,22 @@ workspaces/w-{wsId}/p-{pjId}/
 
 Onde houver conflito, a precedência é: `task_dev` > `dev.md` > `AGENTS.md` > `system_prompt.md`. Na prática, quase nunca há conflito — `dev.md` só estreita o que o `system_prompt.md` permite.
 
-### 3.2.1 Contrato operacional vindo do sistema central
+### 3.2.1 Contrato operacional vindo do Sistema Central
 
-A nova fábrica pode entregar o contexto de execução como JSON, em vez de apenas briefing textual. Antes de codar, confirme que o pacote recebido informa:
+O Sistema Central pode entregar o contexto de execução como JSON, em vez de apenas briefing textual. Antes de codar, confirme que o pacote recebido informa:
 
 - workspace id
 - project id
+- execution id
+- mission id
+- coordinator bot id
 - working directory
 - frontend path
 - backend path
 - credenciais/runtime
 - tipo de round
 - outputs esperados
+- artefatos de escopo aprovados
 
 Se qualquer item crítico estiver ausente, registre a lacuna em `questionamentos_{sistema}_r{N}.md` e não improvise path, projeto ou credencial.
 
@@ -198,9 +204,9 @@ workspaces/w-{wsId}/p-{pjId}/
 
 **NUNCA** crie `frontend-new/`, `frontend-v2/`, scripts na raiz da fábrica, ou arquivos em qualquer lugar fora do `workspaces/w-{wsId}/p-{pjId}/`. O Coordenador valida que você não contaminou nada fora desse escopo.
 
-### 3.6. Proteção anti-contaminação do banco da fábrica
+### 3.6. Proteção anti-contaminação do projeto e do Sistema Central
 
-O `dotenv/config` carrega o `.env` do CWD onde o Node foi invocado. Se você roda `node setup-backend.mjs` da pasta errada, ele pode pegar o `.env` da fábrica e apontar pro `MITRA_PROJECT_ID` dela — e você DDL na fábrica. Incidente real já ocorreu.
+O `dotenv/config` carrega o `.env` do CWD onde o Node foi invocado. Se você roda `node setup-backend.mjs` da pasta errada, ele pode pegar credenciais de outro projeto ou do Sistema Central — e você executa DDL/seeds no alvo errado. Incidente real já ocorreu.
 
 **Toda vez que seu setup-backend.mjs for rodar DDL/seeds, ele DEVE começar com:**
 
@@ -212,7 +218,7 @@ if (Number(process.env.MITRA_PROJECT_ID) !== EXPECTED_PROJECT_ID) {
 }
 ```
 
-Sem esse guard, você pode deletar TODAS as SFs da fábrica com um CWD errado. Não é dramatização — já aconteceu, custou 1 hora de recovery com engenharia reversa via `pullFromS3Mitra`.
+Sem esse guard, você pode deletar Server Functions do projeto errado com um CWD errado. Não é dramatização — já aconteceu, custou 1 hora de recovery com engenharia reversa via `pullFromS3Mitra`.
 
 ---
 
@@ -254,7 +260,7 @@ Antes de declarar concluído, escreva um doc **"Jornada do Usuário Click-a-Clic
 
 **Defenda cada passo**: por que essa transição faz sentido? Se você não consegue defender, o fluxo está errado — volte e desenhe de novo. O QA vai ler essa jornada e se ela não fizer sentido, reprova.
 
-Na nova fábrica, quando `e2e_journeys.json` existir, a jornada click-a-click do Dev deve alinhar com ele. O objetivo não é criar uma segunda verdade; é transformar a jornada aprovada em guia executável para QA e usuário.
+Quando `e2e_journeys.json` existir, a jornada click-a-click do Dev deve alinhar com ele. O objetivo não é criar uma segunda verdade; é transformar a jornada aprovada em guia executável para QA e usuário.
 
 ### 4.3. Buglist (obrigatório em rounds R2+)
 
@@ -917,7 +923,7 @@ curl -s "$URL/$(curl -s $URL/ | grep -oP 'assets/index-[^"]+\.js')" | grep -c "F
 
 ## 18. Guia do Testador (entrega obrigatória)
 
-Ao final do desenvolvimento, você entrega ao Coordenador um **Guia do Testador** que vai ser gravado na tabela `GUIAS_TESTE` do banco da fábrica e vai orientar o Usuário no teste final.
+Ao final do desenvolvimento, você entrega ao Coordenador um **Guia do Testador**. O Coordenador persiste esse guia no Sistema Central e ele orienta QA e Usuário no teste final.
 
 O guia DEVE conter:
 
@@ -969,31 +975,88 @@ Retorne um dev report com:
 
 1. **Confirmação de build + deploy com URL** + hash do bundle (ex: `index-ABC123.js`)
 2. **Project ID e Workspace ID**
-3. **Guia do Testador completo** (pra gravar no banco — o Coordenador extrai e grava em `GUIAS_TESTE`)
+3. **Guia do Testador completo** para persistência no Sistema Central
 4. **Jornada Click-a-Click defendida** para cada persona (pro QA usar)
 5. **Lista de features MUST implementadas** + justificativa de qualquer SHOULD/NICE deixada de fora
 6. **Resultado da validação pós-deploy** (curl título + assets + login das personas + smoke test de SFs)
 7. **Sparkle implementado** + localização + por que é genial
 8. **Buglist.md completo** (quando é round R2+) com 100% DONE
-9. **Persistência CHECKLIST_COMPLETO**: no seu output, inclua o conteúdo do buglist e do smoke test como se fosse relatório — o Coordenador usa isso pra popular tanto `RELATORIO_COMPLETO` quanto `CHECKLIST_COMPLETO` no HISTORICO_QA
-10. **`dev_handoff.json`** com o estado estruturado da entrega para a nova fábrica
+9. **Checklist completo de entrega**: no output, inclua buglist, smoke test e validação pós-deploy como relatório auditável para o Sistema Central
+10. **`dev_handoff.json`** com o estado estruturado da entrega
 
 ---
 
-### 19.1 `dev_handoff.json` obrigatório na nova fábrica
+### 19.1 `dev_handoff.json` obrigatório
 
 Além do dev report humano, entregue um JSON estruturado com:
 
 ```json
 {
-  "implemented_stories": [],
-  "implemented_entities": [],
-  "implemented_data_flows": [],
-  "known_gaps": [],
-  "known_risks": [],
+  "execution_id": "exec_...",
+  "mission_id": "mission_...",
+  "workspace_id": "123",
+  "project_id": "456",
+  "round_type": "R1",
+  "deploy": {
+    "url": "https://{wsId}-{pjId}.prod.mitralab.io",
+    "bundle_hash": "index-ABC123.js",
+    "deployed_at": "ISO-8601"
+  },
+  "implemented_stories": [
+    {
+      "story_id": "ST-001",
+      "status": "implemented",
+      "evidence": "Jornada 1, passos 1-12"
+    }
+  ],
+  "implemented_entities": [
+    {
+      "entity_id": "ENT-001",
+      "crud": {
+        "create": true,
+        "read": true,
+        "update": true,
+        "delete": true
+      }
+    }
+  ],
+  "implemented_data_flows": [
+    {
+      "flow_id": "DF-001",
+      "status": "implemented",
+      "evidence": "Smoke test backend XYZ"
+    }
+  ],
+  "known_gaps": [
+    {
+      "id": "GAP-001",
+      "severity": "minor",
+      "description": "..."
+    }
+  ],
+  "known_risks": [
+    {
+      "id": "RISK-001",
+      "impact": "...",
+      "mitigation": "..."
+    }
+  ],
   "requires_seed_actions": false,
-  "test_accounts": [],
-  "round_type": "R1"
+  "test_accounts": [
+    {
+      "persona_id": "PER-001",
+      "email": "paulo@teste.com",
+      "password": "teste123",
+      "landing_path": "/implantacao"
+    }
+  ],
+  "smoke_tests": [
+    {
+      "name": "login persona implantador",
+      "status": "passed",
+      "evidence": "rowCount > 0"
+    }
+  ]
 }
 ```
 
@@ -1015,4 +1078,4 @@ Se você entregar algo que tenha:
 - Logo errada no light/dark mode
 - Emoji em menu/título
 
-**você falhou.** Não importa se o código compilou. Não importa se o deploy passou. A régua é **10/10/10/10** ou reprovado. Sem atenuantes. A fábrica existe pra entregar sistemas que o Usuário testa no primeiro uso e aprova — não "quase aprova".
+**você falhou.** Não importa se o código compilou. Não importa se o deploy passou. A régua horizontal é **10/10/10/10** ou reprovado. Sem atenuantes. A fábrica existe pra entregar sistemas que o Usuário testa no primeiro uso e aprova — não "quase aprova".
