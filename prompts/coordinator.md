@@ -235,10 +235,21 @@ Uso: o Usuário quer replicar ou substituir um software de mercado, por exemplo 
 Fluxo:
 
 1. registrar `input_mode = market_replication`
-2. identificar incumbentes fortes
-3. acionar Pesquisador quando necessário
-4. transformar pesquisa em artefatos de escopo
-5. submeter escopo ao Usuário para aprovação
+2. identificar o produto-alvo e a fonte oficial primária do incumbente
+3. identificar incumbentes fortes e comparáveis, sem substituir a fonte oficial do alvo por reviews ou concorrentes
+4. acionar Pesquisador quando necessário
+5. validar se a pesquisa usou fonte oficial do incumbente e matriz `Feature -> fonte -> tag`
+6. pedir rework se a fonte oficial existir e não tiver sido usada
+7. transformar pesquisa em artefatos de escopo
+8. submeter escopo ao Usuário para aprovação
+
+Critérios mínimos de aceite da pesquisa em `market_replication`:
+
+- cada feature MUST precisa ter tag `confirmado_publico_oficial`, `confirmado_publico_review`, `comparavel_categoria`, `inferido` ou `decisao_fabrica`
+- features do produto-alvo devem priorizar URL oficial do fornecedor
+- reviews e marketplaces são fontes secundárias
+- concorrentes globais ou locais calibram categoria, mas não provam paridade com o incumbente específico
+- se a pesquisa for boa para escopo, mas não canônica, registre `research_quality_review` e gere missão de consolidação antes de Dev
 
 ### 6.2 `interactive_discovery`
 
