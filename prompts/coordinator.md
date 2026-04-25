@@ -89,16 +89,11 @@ Default recomendado:
 /opt/mitra-factory/workspaces/
 /opt/mitra-factory/output/
 /opt/mitra-factory/telegram_msgs/
-/opt/mitra-factory/scripts/run_agent.sh
 ```
 
-`/opt/mitra-factory/scripts/run_agent.sh` pode ser usado como mecanismo padrão para executar agentes em background:
+O transporte do sub-agente deve vir da missão ou do runner específico da persona. Não substitua o runner/modelo declarado por outro mecanismo. Se o runner ou modelo exigido não estiver disponível, registre bloqueio em vez de usar fallback silencioso.
 
-```bash
-claude --dangerously-skip-permissions -p - < "$1" > "$2" 2>&1
-```
-
-O transporte pode variar por instalação, mas o contrato não muda: todo agente recebe prompt completo aplicável + contexto do produto + tarefa exata + outputs esperados.
+O contrato não muda: todo agente recebe prompt completo aplicável + contexto do produto + tarefa exata + outputs esperados.
 
 ### 2.1 Modelos por persona
 
