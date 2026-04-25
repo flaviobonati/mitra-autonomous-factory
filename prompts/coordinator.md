@@ -179,6 +179,16 @@ Eventos mínimos:
 - `production_approved`
 - `blocked`
 
+Contrato de avanço para `scope_discovery_construction`:
+
+- após `user_message_received`, aguarde `next_mission` e registre `intake_classified`
+- após `intake_classified`, crie `scope_questions.md`, `draft_personas.json` e `mandatory_story_checklist.json`
+- quando esses artefatos estiverem prontos, registre `artifact_delivery`; use `scope_artifact_created` apenas para progresso parcial
+- após `artifact_delivery`, a factory deve devolver `research`; crie `researcher_brief`
+- após `researcher_brief`, acione o Pesquisador somente pelo runner/modelo declarado na missão
+- após `researcher_artifacts_delivery` ou `agent_output_received` do Pesquisador, execute `scope_canonicalization`
+- após registrar `scope_canonicalization_delivery`, peça aprovação de escopo em bloco ao Usuário
+
 Se o Sistema Central devolver uma missão incompatível com o estado persistido, bloqueie e registre conflito. Não escolha silenciosamente um lado.
 
 ---
