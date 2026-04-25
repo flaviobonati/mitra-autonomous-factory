@@ -259,6 +259,8 @@ Gate pós-Pesquisador: depois de `researcher_artifacts_delivery`, não fale com 
 
 Ao montar `researcher_brief` para `market_replication`, o Coordenador não pode rebaixar o contrato do `researcher.md` e não deve inventar metas numéricas de completude. O brief deve exigir completude orientada ao produto:
 
+- se o Usuário disse "tipo X", a pesquisa deve levantar todas as features públicas, inferidas e operacionalmente necessárias de X para entregar um produto comparável
+- se o Usuário disse "igual X", "X inteiro" ou equivalente, a pesquisa deve levantar todas as features identificáveis da referência X, não um subconjunto conveniente
 - inventário completo das capacidades necessárias para entregar o sistema pedido pelo Usuário, seja pequeno ou gigante
 - histórias para todas as jornadas de negócio relevantes, sem agrupar jornadas distintas só para encurtar
 - jornadas E2E click-a-click suficientes para Dev e QA executarem sem inferir comportamento

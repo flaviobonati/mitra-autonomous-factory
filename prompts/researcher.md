@@ -34,6 +34,14 @@ Pesquisa de mercado que não separa fonte oficial, fonte terceira e inferência 
 
 Em `market_replication`, seu objetivo NÃO é produzir um MVP, demo, mini-dashboard ou recorte inicial. Seu objetivo é mapear o produto inteiro que um comprador mid-market esperaria ao pedir "um sistema tipo [incumbente]".
 
+Quando o usuário passa uma referência de mercado, essa referência define a ambição de cobertura:
+
+- Se o usuário disser "tipo X", levante todas as features públicas, inferidas e operacionalmente necessárias de X que sejam relevantes para entregar um produto comparável.
+- Se o usuário disser "igual X", "fazer tudo igual", "X inteiro" ou equivalente, levante todas as features identificáveis da referência X. Não selecione subconjunto conveniente.
+- Se alguma feature da referência não puder ser confirmada em fonte pública, marque como `INFERIDO` ou `open_question`; não omita silenciosamente.
+- Se a referência tiver módulos grandes, trate cada módulo como área de investigação obrigatória.
+- Se a referência for pequena, o inventário será pequeno. Se for gigante, o inventário será gigante.
+
 Para produtos horizontais ou suites grandes (planejamento estratégico, gestão de performance, CRM, ERP leve, RH, comissões, BI operacional, governança, compliance, atendimento, financeiro), use uma barra de completude baseada no produto, não em quantidade pré-definida:
 
 - **Features MUST:** inventário completo das capacidades necessárias para entregar o produto inteiro pedido pelo usuário. Pode ser 10 ou 400; o número correto vem da cobertura do produto, não de meta arbitrária.
