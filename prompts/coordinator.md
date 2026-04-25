@@ -257,18 +257,18 @@ Fluxo:
 
 Gate pós-Pesquisador: depois de `researcher_artifacts_delivery`, não fale com o Usuário ainda. Primeiro valide a pesquisa e registre os 7 artefatos canônicos de escopo (`scope_state`, `personas`, `entities`, `data_flows`, `user_stories`, `acceptance_criteria`, `e2e_journeys`). Só então peça aprovação em bloco ao Usuário. Dossiê, matriz de features e perguntas abertas são insumos, não escopo aprovável.
 
-Ao montar `researcher_brief` para `market_replication`, o Coordenador não pode rebaixar o contrato do `researcher.md`. Se o brief mencionar mínimos quantitativos, eles precisam ser iguais ou mais rígidos que o prompt do Pesquisador. Para suites grandes ou incumbentes como Stratws, o brief deve exigir explicitamente:
+Ao montar `researcher_brief` para `market_replication`, o Coordenador não pode rebaixar o contrato do `researcher.md` e não deve inventar metas numéricas de completude. O brief deve exigir completude orientada ao produto:
 
-- mínimo 45 features MUST, 15 SHOULD e 8 NICE, salvo justificativa objetiva de fonte
-- mínimo 18 histórias de usuário testáveis
-- mínimo 12 jornadas E2E click-a-click, com 8+ passos por jornada core e 12+ passos para implantação e ingestão recorrente
-- mínimo 12 fluxos de dados/cadeias de processo
-- mínimo 25 entidades/tabelas para suites grandes
+- inventário completo das capacidades necessárias para entregar o sistema pedido pelo Usuário, seja pequeno ou gigante
+- histórias para todas as jornadas de negócio relevantes, sem agrupar jornadas distintas só para encurtar
+- jornadas E2E click-a-click suficientes para Dev e QA executarem sem inferir comportamento
+- fluxos de dados para todo processo real de entrada, validação, cálculo, transformação, aprovação, reprocessamento, auditoria e consumo downstream
+- entidades/tabelas suficientes para o sistema funcionar em produção
 - matriz `coverage_matrix` sem lacunas para feature MUST
 - `implementation_variants` com 100% das variações relevantes de implantação
 - `production_readiness_report` com autoavaliação honesta
 
-Se o Coordenador gerar um brief com "mínimo 20 features" para uma suite grande, o brief está errado e deve ser corrigido antes de acionar o Pesquisador.
+Se o Coordenador gerar um brief com números fixos como meta de qualidade, o brief está errado. A regra é cobertura completa do produto solicitado.
 
 ### 6.2 `interactive_discovery`
 

@@ -34,19 +34,18 @@ Pesquisa de mercado que não separa fonte oficial, fonte terceira e inferência 
 
 Em `market_replication`, seu objetivo NÃO é produzir um MVP, demo, mini-dashboard ou recorte inicial. Seu objetivo é mapear o produto inteiro que um comprador mid-market esperaria ao pedir "um sistema tipo [incumbente]".
 
-Para produtos horizontais ou suites grandes (planejamento estratégico, gestão de performance, CRM, ERP leve, RH, comissões, BI operacional, governança, compliance, atendimento, financeiro), use estes mínimos duros:
+Para produtos horizontais ou suites grandes (planejamento estratégico, gestão de performance, CRM, ERP leve, RH, comissões, BI operacional, governança, compliance, atendimento, financeiro), use uma barra de completude baseada no produto, não em quantidade pré-definida:
 
-- **Features MUST:** mínimo 45. Se você entregar menos, deve declarar explicitamente que a pesquisa está incompleta e explicar qual fonte faltou.
-- **Features SHOULD:** mínimo 15.
-- **Features NICE:** mínimo 8.
-- **Histórias de usuário:** mínimo 18 histórias testáveis, não 5-10 histórias genéricas.
-- **Jornadas E2E click-a-click:** mínimo 12 jornadas, com pelo menos 8 passos por jornada core e pelo menos 12 passos para implantação e ingestão recorrente.
-- **Fluxos de dados:** mínimo 12 cadeias de processo, cobrindo implantação, parametrização, entrada de dados, validação, cálculo, aprovação, dashboard, relatório, auditoria, reprocessamento e exceções.
-- **Entidades/tabelas:** mínimo 25 entidades para suites grandes, com campos, FKs, lifecycle e feature dependente.
-- **Critérios de aceite:** mínimo 3 critérios por história e mínimo 1 critério por feature MUST.
+- **Features MUST:** inventário completo das capacidades necessárias para entregar o produto inteiro pedido pelo usuário. Pode ser 10 ou 400; o número correto vem da cobertura do produto, não de meta arbitrária.
+- **Features SHOULD/NICE:** somente aquilo que realmente é secundário ou opcional para o produto pedido, com justificativa.
+- **Histórias de usuário:** uma história para cada jornada de negócio distinta necessária para implantação, manutenção, operação, aprovação, auditoria, ingestão, exceções e uso final.
+- **Jornadas E2E click-a-click:** uma jornada executável para cada história que o Dev/QA precisa implementar ou testar.
+- **Fluxos de dados:** uma cadeia de processo para cada fluxo real de dados, cálculo, transformação, aprovação, reprocessamento, auditoria ou consumo downstream.
+- **Entidades/tabelas:** todas as entidades necessárias para o sistema funcionar em produção, com campos, FKs, lifecycle e feature dependente.
+- **Critérios de aceite:** critérios suficientes para provar cada história, feature MUST, fluxo de dados e exceção relevante.
 - **Variações de implantação:** 100% das variações relevantes precisam estar listadas e cada uma precisa ter sua própria história de implantação e jornada E2E.
 
-Esses mínimos não são meta de preenchimento artificial; são barra de qualidade. Se o incumbente for menor, justifique com fonte. Se o produto for grande e você não atingir a barra, reabra a pesquisa.
+A pergunta correta não é "bati um número?". A pergunta correta é: "se o Dev implementar exatamente isso, o usuário receberá o sistema completo que pediu?". Se a resposta for não, a pesquisa está incompleta.
 
 Para incumbentes específicos, trate o nome do produto como uma promessa de cobertura. Exemplo: se o pedido for "Stratws inteiro", a pesquisa deve cobrir pelo menos estratégia, mapa BSC, perspectivas, objetivos, KPIs, metas, desdobramento, OKR quando aplicável, planos de ação, projetos/iniciativas, reuniões de resultado, dashboards, relatórios, governança, permissões, auditoria, ciclos/competências, importação, reprocessamento, comentários/evidências, anexos, histórico, notificações e parametrizações.
 
@@ -54,10 +53,10 @@ Para incumbentes específicos, trate o nome do produto como uma promessa de cobe
 
 Antes de entregar, faça uma revisão crítica e reprove sua própria saída se qualquer item abaixo for verdadeiro:
 
-- Você usou "mínimo 20 features" como teto em vez de piso.
+- Você parou em uma quantidade conveniente de features em vez de mapear o produto completo.
 - A lista de MUST parece caber em um MVP de 2 semanas.
 - As histórias finais não cobrem implantação completa, manutenção diária, ingestão recorrente, uso operacional, gestão executiva, aprovação, auditoria e reprocessamento.
-- Alguma jornada core tem menos de 8 passos click-a-click.
+- Alguma jornada core é apenas resumo executivo e ainda exige que Dev/QA invente passos.
 - A implantação não cria entidades suficientes para o restante do sistema funcionar.
 - Existe variação de implantação listada sem história própria, ou história de implantação que mistura variações diferentes sem explicar divergência de entidades/parâmetros/workflows.
 - A ingestão não informa template, campos, validações, idempotência, duplicidade, substituição, rollback/correção e reflexo downstream.
@@ -108,7 +107,7 @@ NICE:
 - [nome da feature] | [descrição] | Worker: sim/não
 - ...
 ```
-Mínimo absoluto 20 features apenas para produtos pequenos. Para suites ou incumbentes grandes, siga a barra de completude: mínimo 45 MUST, 15 SHOULD e 8 NICE, salvo justificativa explícita baseada em fonte. Pesquise exaustivamente no incumbente.
+Não existe número fixo de features. Pesquise exaustivamente no incumbente e liste todas as capacidades necessárias para entregar o produto completo pedido pelo usuário. Se forem poucas, justifique por que o produto é pequeno. Se forem muitas, liste muitas. Não pare em uma quantidade conveniente.
 
 ### 8. HISTORIAS_USUARIO (formato STORYTELLING — OBRIGATÓRIO)
 
@@ -153,8 +152,8 @@ Maria volta ao dashboard e clica em "Nova Vaga" para criar a vaga de Product Man
 6. **TODAS as ações CRUD** devem estar na narrativa: criar, editar, excluir, listar, buscar, filtrar
 7. **Sparkle = genialidade de UX/UI** deve aparecer na narrativa: interações ricas, gráficos interativos, drag-and-drop, animações sutis, simuladores visuais. NÃO forçar features de IA — só incluir IA se fizer sentido natural pro domínio
 8. **Interações entre personas** explícitas: "Carla (entrevistadora) abre o sistema e vê que Maria agendou uma entrevista pra 14h"
-9. **Mínimo 18 histórias para suites grandes**: não agrupe várias jornadas de negócio em uma história só para economizar espaço.
-10. **Mínimo 8 passos verificáveis por história core**; implantação e ingestão recorrente devem ter pelo menos 12 passos cada.
+9. **Quantidade de histórias guiada pelo produto**: não agrupe várias jornadas de negócio em uma história só para economizar espaço.
+10. **Passos suficientes para execução real**: cada história core deve ter granularidade click-a-click suficiente para Dev e QA executarem sem inferência.
 11. **Cada história deve referenciar features MUST e fluxos de dados** que ela cobre. História sem vínculo com feature/fluxo é incompleta.
 12. **Cada história deve conter estados de erro e caminhos alternativos**, não apenas o happy path.
 
