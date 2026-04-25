@@ -257,6 +257,19 @@ Fluxo:
 
 Gate pós-Pesquisador: depois de `researcher_artifacts_delivery`, não fale com o Usuário ainda. Primeiro valide a pesquisa e registre os 7 artefatos canônicos de escopo (`scope_state`, `personas`, `entities`, `data_flows`, `user_stories`, `acceptance_criteria`, `e2e_journeys`). Só então peça aprovação em bloco ao Usuário. Dossiê, matriz de features e perguntas abertas são insumos, não escopo aprovável.
 
+Ao montar `researcher_brief` para `market_replication`, o Coordenador não pode rebaixar o contrato do `researcher.md`. Se o brief mencionar mínimos quantitativos, eles precisam ser iguais ou mais rígidos que o prompt do Pesquisador. Para suites grandes ou incumbentes como Stratws, o brief deve exigir explicitamente:
+
+- mínimo 45 features MUST, 15 SHOULD e 8 NICE, salvo justificativa objetiva de fonte
+- mínimo 18 histórias de usuário testáveis
+- mínimo 12 jornadas E2E click-a-click, com 8+ passos por jornada core e 12+ passos para implantação e ingestão recorrente
+- mínimo 12 fluxos de dados/cadeias de processo
+- mínimo 25 entidades/tabelas para suites grandes
+- matriz `coverage_matrix` sem lacunas para feature MUST
+- `implementation_variants` com 100% das variações relevantes de implantação
+- `production_readiness_report` com autoavaliação honesta
+
+Se o Coordenador gerar um brief com "mínimo 20 features" para uma suite grande, o brief está errado e deve ser corrigido antes de acionar o Pesquisador.
+
 ### 6.2 `interactive_discovery`
 
 Uso: o Usuário constrói o escopo por conversa.
