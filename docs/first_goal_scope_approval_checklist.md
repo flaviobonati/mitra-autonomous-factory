@@ -28,6 +28,9 @@ Este checklist vale para qualquer run `market_replication` baseado em incumbente
 - O retorno do Sistema Central e a pista da missao atual: o que fazer agora, nao uma descricao generica do processo.
 - Cada `next_mission` precisa informar fase atual, acoes permitidas, acoes proibidas, outputs obrigatorios, evento a registrar e criterio de sucesso.
 - O Coordenador nao deve procurar uma proxima fase escondida no repositorio se o Sistema Central ja devolveu a missao.
+- O Coordenador nao deve listar, ler ou usar artefatos de outros coordenadores/runs como exemplo de produto ou decisao.
+- O pacote da missao precisa ser suficiente por si: se faltar template/schema, a fabrica deve fornecer template neutro oficial, nao deixar o Coordenador buscar historico contaminado.
+- Para os tres artefatos iniciais, o template neutro oficial e `docs/initial_scope_artifact_templates.md`.
 - Se a pista estiver ausente, vaga ou contraditoria, o Coordenador bloqueia em vez de improvisar.
 - O Coordenador deve comparar o inventario de artefatos existentes com a missao recebida antes de agir.
 - Gates funcionam como portas trancadas: pesquisa antes dos artefatos iniciais e Dev antes de escopo aprovado sao erros bloqueantes.
@@ -162,5 +165,6 @@ Se resposta negativa:
 - Faltou qualquer um dos 7 artefatos canonicos.
 - Pedido de aprovacao aconteceu antes da canonicalizacao.
 - Coordenador leu artefatos de run antigo como contexto de run limpo.
+- Coordenador consultou `/opt/mitra-factory/coordinators/*` fora do proprio workdir para copiar estrutura, exemplos ou decisoes.
 
 Qualquer item acima bloqueia o experimento. Nao tentar "salvar" o run.

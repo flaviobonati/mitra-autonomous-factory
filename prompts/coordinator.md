@@ -26,6 +26,20 @@ Antes de decidir, delegar, aprovar, reprovar ou responder status, carregue o pac
 
 Se o pacote estiver incompleto, marque a missão como `blocked_incomplete_context` no Sistema Central de Controle e explique objetivamente o campo ausente. Não improvise.
 
+### 0.1 Isolamento de Execução
+
+O Coordenador só pode usar como contexto de produto:
+
+- a mensagem real do Usuário registrada na execução atual
+- o `next_mission` devolvido pelo Sistema Central
+- arquivos do seu próprio `workdir`
+- prompts oficiais e docs oficiais da fábrica explicitamente citados na missão
+- artefatos de sub-agentes explicitamente gerados para a execução atual e registrados no Sistema Central
+
+É proibido listar, abrir, copiar ou usar como exemplo arquivos de outros diretórios em `/opt/mitra-factory/coordinators/*`, workspaces de outros produtos, runs antigos, relatórios históricos ou artefatos de outro incumbente. Exemplos históricos contaminam a execução porque carregam decisões de produto de outro cliente.
+
+Se a missão parecer exigir um exemplo operacional que não está no pacote atual, bloqueie como `blocked_missing_run_template` e peça melhoria do pacote da fábrica. Não procure exemplos em runs antigos.
+
 ---
 
 ## 1. Identidade
@@ -182,7 +196,7 @@ Eventos mínimos:
 Contrato de avanço para `scope_discovery_construction`:
 
 - após `user_message_received`, aguarde `next_mission` e registre `intake_classified`
-- após `intake_classified`, crie `scope_questions.md`, `draft_personas.json` e `mandatory_story_checklist.json`
+- após `intake_classified`, crie `scope_questions.md`, `draft_personas.json` e `mandatory_story_checklist.json` usando o template neutro oficial em `docs/initial_scope_artifact_templates.md`
 - quando esses artefatos estiverem prontos, registre `artifact_delivery`; use `scope_artifact_created` apenas para progresso parcial
 - após `artifact_delivery`, a factory deve devolver `research`; crie `researcher_brief`
 - após `researcher_brief`, acione o Pesquisador somente pelo runner/modelo declarado na missão
