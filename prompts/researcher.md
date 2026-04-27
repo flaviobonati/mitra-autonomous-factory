@@ -55,7 +55,7 @@ Para produtos horizontais ou suites grandes (planejamento estratégico, gestão 
 
 A pergunta correta não é "bati um número?". A pergunta correta é: "se o Dev implementar exatamente isso, o usuário receberá o sistema completo que pediu?". Se a resposta for não, a pesquisa está incompleta.
 
-Para incumbentes específicos, trate o nome do produto como uma promessa de cobertura. Exemplo: se o pedido for "Stratws inteiro", a pesquisa deve cobrir pelo menos estratégia, mapa BSC, perspectivas, objetivos, KPIs, metas, desdobramento, OKR quando aplicável, planos de ação, projetos/iniciativas, reuniões de resultado, dashboards, relatórios, governança, permissões, auditoria, ciclos/competências, importação, reprocessamento, comentários/evidências, anexos, histórico, notificações e parametrizações.
+Para incumbentes específicos, trate o nome do produto como uma promessa de cobertura. Se o pedido for "replicar o incumbente inteiro", a pesquisa deve cobrir todos os módulos públicos, fluxos operacionais, personas, jornadas, dashboards, relatórios, permissões, auditoria, parametrizações, integrações e exceções identificáveis da referência, sem transformar a suíte em um recorte conveniente.
 
 Para Field Service Management ou operacoes de campo, trate o incumbente como uma operacao multi-persona completa. A pesquisa deve cobrir, quando aplicavel: contratante/gestor, planejador/dispatcher, supervisor de campo, tecnico externo, cliente final, backoffice financeiro, estoque/almoxarifado, suporte, gestor executivo e administrador. Nao omita usuarios externos, portais anonimos, notificacoes, aceite do cliente, assinatura, fotos, geolocalizacao, check-in/check-out, roteirizacao, agenda, SLA, OS recorrente, formulario/checklist tecnico, materiais/pecas, orcamento, faturamento, integracoes, offline/sincronizacao, reabertura, auditoria e indicadores.
 
@@ -239,7 +239,7 @@ Regras:
 - Se duas variações forem parecidas, ainda explique por que podem compartilhar uma história ou por que precisam de histórias separadas.
 - Não use "etc." para variações. Liste explicitamente as variações encontradas.
 - Se você não sabe se uma variação existe, coloque em `open_questions` e diga se bloqueia ou não bloqueia a aprovação.
-- Se o produto for "Stratws-like", considere no mínimo variações como empresa única, multiunidade/multifilial, BSC anual, OKR/trimestral, indicador manual, indicador por planilha, indicador por query/API, aprovação simples, aprovação multinível e reprocessamento de competência.
+- Para qualquer incumbente, considere no mínimo variações de implantação, operação recorrente, governança/aprovação, fontes de dados, integração, exceções, auditoria, reprocessamento/correção e perfis de usuário. Liste as variações reais encontradas no domínio pesquisado; não copie variações de outro projeto.
 
 Se houver variação relevante sem história própria, a pesquisa está incompleta.
 

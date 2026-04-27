@@ -1,6 +1,6 @@
 # New Run Readiness Gates
 
-Este documento define a barra minima antes de iniciar um novo run coordenado pela fabrica apos o fracasso Stratws.
+Este documento define a barra minima antes de iniciar um novo run coordenado pela fabrica apos uma execucao anterior com falhas de canonizacao, escopo e QA.
 
 ## 0. Sistema da fabrica e next mission
 
@@ -47,4 +47,3 @@ O gateway deve bloquear `qa_approved` horizontal quando:
 - score informado for diferente de 10 em qualquer dimensao.
 
 Retest herda a definicao original do bug: `origin_report`, `origin_failed_checks` e `evidence_by_check`. Nao basta provar o titulo resumido do bug.
-

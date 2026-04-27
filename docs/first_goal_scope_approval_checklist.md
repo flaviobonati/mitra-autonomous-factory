@@ -2,7 +2,7 @@
 
 Objetivo: chegar da primeira mensagem do usuario ate a aprovacao de escopo com zero erro de processo.
 
-Este checklist vale para runs `market_replication` como o Stratws-like.
+Este checklist vale para qualquer run `market_replication` baseado em incumbente de mercado.
 
 ## 1. Nascimento do Coordenador
 
@@ -49,7 +49,7 @@ Sequencia minima esperada:
 - O Coordenador classifica `input_mode = market_replication` quando houver incumbente de mercado.
 - Se a missao permitir defaults, ele nao faz follow-up desnecessario.
 - Se faltar dado bloqueante, ele pergunta antes da pesquisa.
-- Para o Stratws-like, o default e produto completo, nao mini-dashboard.
+- Para incumbente de mercado, o default e produto completo, nao mini-produto nem recorte conveniente.
 
 ## 5. Artefatos Iniciais Antes do Pesquisador
 
@@ -108,20 +108,20 @@ Regras de consistencia:
 - Jornada de implantacao completa.
 - Jornada de ingestao de cada fonte primaria.
 - Jornada de carregamento mensal ou recorrente por competencia.
-- Jornada de desdobramento estrategico.
-- Jornada de rotina de resultados.
+- Jornada operacional core do dominio.
+- Jornada de rotina recorrente do dominio.
 - Jornada de aprovacao/governanca.
 - Jornada de auditoria/reprocessamento/correcao.
 
-Para incumbentes como Stratws, tambem avaliar jornadas alternativas:
+Para incumbentes complexos, tambem avaliar jornadas alternativas:
 
-- implantacao simples vs multi-area/multi-unidade
-- indicador manual vs indicador por fonte de dados
+- implantacao simples vs multiunidade/multifilial/multiequipe
+- dado manual vs dado por planilha/API/integracao
 - fonte oficial disponivel vs lacuna inferida justificada
-- carga inicial vs carga mensal recorrente
-- meta aprovada vs meta rejeitada/reaberta
-- plano de acao em dia vs atrasado/escalado
-- reuniao com decisoes aprovadas vs pendencias reabertas
+- carga inicial vs carga recorrente
+- aprovacao simples vs aprovacao multinivel
+- item operacional em dia vs atrasado/escalado
+- decisao aprovada vs pendencia reaberta
 - usuario aprovou escopo vs usuario pediu rework
 
 Essas alternativas nao precisam virar todos os MVPs, mas precisam estar decididas: `MUST`, `SHOULD`, `NICE` ou `FORA`.
