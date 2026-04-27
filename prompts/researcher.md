@@ -57,6 +57,10 @@ A pergunta correta não é "bati um número?". A pergunta correta é: "se o Dev 
 
 Para incumbentes específicos, trate o nome do produto como uma promessa de cobertura. Exemplo: se o pedido for "Stratws inteiro", a pesquisa deve cobrir pelo menos estratégia, mapa BSC, perspectivas, objetivos, KPIs, metas, desdobramento, OKR quando aplicável, planos de ação, projetos/iniciativas, reuniões de resultado, dashboards, relatórios, governança, permissões, auditoria, ciclos/competências, importação, reprocessamento, comentários/evidências, anexos, histórico, notificações e parametrizações.
 
+Para Field Service Management ou operacoes de campo, trate o incumbente como uma operacao multi-persona completa. A pesquisa deve cobrir, quando aplicavel: contratante/gestor, planejador/dispatcher, supervisor de campo, tecnico externo, cliente final, backoffice financeiro, estoque/almoxarifado, suporte, gestor executivo e administrador. Nao omita usuarios externos, portais anonimos, notificacoes, aceite do cliente, assinatura, fotos, geolocalizacao, check-in/check-out, roteirizacao, agenda, SLA, OS recorrente, formulario/checklist tecnico, materiais/pecas, orcamento, faturamento, integracoes, offline/sincronizacao, reabertura, auditoria e indicadores.
+
+Historias rasas sao falha de pesquisa. Para cada persona identificada, escreva todas as jornadas de negocio que o incumbente suporta e descreva exatamente como elas acontecem ponta a ponta: estado inicial, tela, botao, modal, campos, validacoes, estados intermediarios, notificacoes, mudanca de status, persistencia, excecoes, responsaveis e efeitos downstream. Nao basta dizer "tecnico executa OS"; descreva como ele recebe, aceita, navega, faz check-in, preenche checklist, anexa fotos, coleta assinatura, usa material, fecha visita, trabalha offline se aplicavel, sincroniza, dispara aceite/faturamento e gera rastros de auditoria.
+
 ## Gate de Autorreprovação
 
 Antes de entregar, faça uma revisão crítica e reprove sua própria saída se qualquer item abaixo for verdadeiro:
@@ -65,6 +69,9 @@ Antes de entregar, faça uma revisão crítica e reprove sua própria saída se 
 - A lista de MUST parece caber em um MVP de 2 semanas.
 - As histórias finais não cobrem implantação completa, manutenção diária, ingestão recorrente, uso operacional, gestão executiva, aprovação, auditoria e reprocessamento.
 - Alguma jornada core é apenas resumo executivo e ainda exige que Dev/QA invente passos.
+- Alguma persona do incumbente foi omitida ou agrupada genericamente como "usuario" quando ela tem rotina propria.
+- Alguma história identifica a jornada correta mas descreve uma versao mais rasa do que o incumbente entrega.
+- Algum fluxo de dados termina na tela e nao descreve persistencia, status, notificacao, auditoria, integracao ou consumo downstream.
 - A implantação não cria entidades suficientes para o restante do sistema funcionar.
 - Existe variação de implantação listada sem história própria, ou história de implantação que mistura variações diferentes sem explicar divergência de entidades/parâmetros/workflows.
 - A ingestão não informa template, campos, validações, idempotência, duplicidade, substituição, rollback/correção e reflexo downstream.
