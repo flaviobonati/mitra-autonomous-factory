@@ -513,9 +513,22 @@ Outputs:
 
 ### 10.2 QA Story Validation
 
-Valida histórias em batches determinados pelo Sistema Central.
+Valida histórias em batches determinados pelo Sistema Central e pelos artefatos canônicos da execução. O Coordenador não deve escolher manualmente um lote isolado e depois improvisar o próximo; ele deve materializar um plano completo de batches antes de spawnar o primeiro QA Story.
 
 QA Story só começa depois de QA Horizontal aprovado.
+
+Política obrigatória de batching:
+
+- carregar `user_stories.json`, `e2e_journeys.json`, `acceptance_criteria.json`, `data_flows.json`, `personas.json` e `coverage_matrix.csv`
+- criar `qa_story_batch_plan.json` com todos os `story_id` canônicos, `journey_id`, persona, fluxos de dados, critérios e ordem de execução
+- tamanho padrão do lote: 3 histórias
+- teto recomendado: 4 histórias quando o grupo for coeso por fluxo/persona e não comprometer a precisão do report
+- exceção: história grande, bloqueante, transversal ou de alto risco pode virar lote menor/unitário, com justificativa no plano
+- ordem padrão por dependência: implantação/configuração, ingestão/carga, reprocessamento/governança/metas, rotina operacional/reunião, auditoria/exportação
+- cada lote deve conter histórias coesas por persona, fluxo de dados ou dependência operacional
+- depois de cada batch, registrar o resultado real no Sistema Central e seguir automaticamente para fix/retest ou para o próximo batch planejado, conforme `next_mission`
+- não pedir decisão manual do Usuário para cada lote, salvo mudança de escopo, bloqueio real ou decisão de release
+- qualquer batch obrigatório ausente bloqueia QA Consolidation e produção
 
 Cada batch gera:
 

@@ -20,6 +20,52 @@ Validate:
 6. button inventory and cross-cutting defects
 7. general product polish
 
+## Planner -> Executor Contract
+
+When QA Horizontal is split into Planner and Executor, the Planner does not only inventory routes and visible actions.
+The Planner must also convert the mandatory rules inherited from `qa-core.md` into a markable checklist.
+
+The Planner output must include `qa_core_checklist` with stable IDs and enough context for the Executor to test each item:
+
+- `DESIGN-01..DESIGN-27` for every Design check in `qa-core.md`.
+- `UX-PERSONA-*` for each persona journey or horizontal UX journey that must be scored.
+- `FEATURE-MUST-*` for each feature MUST from the approved scope.
+- `DATAFLOW-*` for each approved data-flow chain.
+- `RULE-A..RULE-H` for the mandatory verification rules.
+- `DEV-CHECK-*` for Dev compliance checks listed in `qa-core.md`.
+
+Each checklist item must include:
+
+- `check_id`
+- `dimension`: `ui|ux|features|data_flow`
+- `source_rule`
+- `requirement`
+- `test_plan`
+- `evidence_required`
+- `mandatory`: boolean
+
+The Executor must copy that checklist into its report as `qa_core_checklist_execution` and mark every mandatory item with `PASS`, `FAIL`, or `NA_WITH_REASON`, plus evidence.
+The Executor may not approve 10/10/10/10 if any mandatory item is missing, unmarked, `FAIL`, or `NA_WITH_REASON` without a defensible source-based reason.
+
+## Retest Inheritance Contract
+
+When a retest validates a bug opened by QA Horizontal, the bug definition is not the short title in the fix handoff. The bug definition is the original failure record plus every failed checklist item and deduction that caused it.
+
+For each bug in `bug_retest_matrix`, the retest must include:
+
+- `origin_report`: path to the QA report that opened the bug.
+- `origin_failed_checks`: stable check IDs from the original report or plan that the bug covers.
+- `evidence_by_check`: one evidence object per origin failed check, each with `status`, `method`, `actual`, and `screenshot_path` or command output.
+
+The retest may not mark a bug `PASS` when its evidence proves a different issue than the original failed checks. If any `origin_failed_checks` item is missing, untested, or still failing, the bug status must be `FAIL` and `approved_10_10_10_10` must be `false`.
+
+Branding and copy checks are strict, not cosmetic. When a bug includes design checks for logo, favicon, product name, or accentuation, the retest must prove the exact source asset and visible text:
+
+- Logo evidence must include the deployed asset path and, when an official asset exists, SHA-256 or byte-for-byte comparison against the official file.
+- A generic SVG, a placeholder mark, or an HTTP 200 asset is insufficient evidence for an official brand logo.
+- Accentuation evidence must include DOM-visible text extraction or grep of rendered/built text covering menus, page titles, labels, and primary actions.
+- Screenshots alone are insufficient unless paired with the extracted visible text that was evaluated.
+
 ## Scope Of This Layer
 
 This layer is responsible for:
