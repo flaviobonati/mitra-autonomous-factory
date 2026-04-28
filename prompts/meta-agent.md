@@ -255,6 +255,41 @@ Gate adicional: se `runtime_contract.json` tiver `project_dir`, `frontend_dir` o
 
 Objetivo: iniciar um Coordenador persistente e limpo, capaz de conduzir o cliente sem ajuda do Meta-Agent.
 
+### 5.0 Gate de spawn do Coordenador
+
+Antes de criar qualquer Coordenador real, o Meta-Agent deve produzir e validar um `coordinator_spawn_readiness.json`.
+
+Campos obrigatorios:
+
+```json
+{
+  "workspace_id_combined_with_flavio": "<workspace_id>",
+  "product_project_created_or_selected": true,
+  "product_project_id": "<project_id>",
+  "product_project_dir": "/opt/mitra-factory/workspaces/w-<workspace>/p-<project>",
+  "project_is_not_factory": true,
+  "project_has_frontend_backend": true,
+  "project_has_git": true,
+  "project_has_mitra_agent_files": true,
+  "coordinator_package_ready": true,
+  "coordinator_will_run_in_tmux": true,
+  "first_message_is_natural_user_request_only": true
+}
+```
+
+O spawn e proibido se qualquer item estiver `false`, ausente ou inferido sem evidencia.
+
+Evidencias minimas antes do spawn:
+
+- `listProjectsMitra` ou prova equivalente de que o projeto Mitra existe no workspace combinado;
+- `realpath(product_project_dir)`;
+- `git -C product_project_dir rev-parse --is-inside-work-tree`;
+- existencia de `frontend/`, `backend/`, `.env.local`, `AGENTS.md`, `system_prompt.md`;
+- existencia do pacote do Coordenador com `COORDINATOR.md` e `runtime_contract.json`;
+- nome da sessao `tmux` planejada.
+
+Se o projeto de produto ainda nao existe, crie o projeto Mitra no workspace combinado antes de spawnar o Coordenador. Nunca spawne Coordenador esperando que ele "resolva depois" o projeto de produto.
+
 ### 5.1 Preparar IDs e diretorios
 
 Crie:
@@ -301,10 +336,12 @@ FACTORY_AUTO_DEPLOY_LIVE_STATE=0
 Primeira mensagem permitida ao Coordenador:
 
 ```text
-Leia COORDINATOR.md. coordinator_code=<code>; execution_code=<code>; gateway=<factory_gateway_path>. Usuario: <mensagem natural do usuario>
+Leia COORDINATOR.md inteiro antes de agir. coordinator_code=<code>; execution_code=<code>; gateway=<factory_gateway_path>; product_project_id=<project_id>; product_project_dir=<product_project_dir>. Usuario: <mensagem natural do usuario>
 ```
 
 Nada alem disso.
+
+O Meta-Agent nao deve enviar checklist interno, estrategia de escopo, nomes de eventos, conteudo de prompt ou instrucao de como passar no teste. A unica parte "operacional" da primeira mensagem sao os IDs e paths necessarios para o Coordenador carregar o pacote correto; a demanda do Usuario deve permanecer natural.
 
 ### 5.4 Depois do spawn
 
@@ -394,6 +431,10 @@ Gate antes de Dev:
 6. Dev recebe artefatos de escopo e nao recebe factory como projeto de produto.
 7. Git/snapshot da missao foi preparado.
 8. Evento `agent_spawned` sera registrado pelo Coordenador, nao pelo Meta-Agent.
+9. Projeto do produto contem `AGENTS.md`, `system_prompt.md`, `.env.local`, `frontend/`, `backend/` e git interno.
+10. O pacote do Dev obriga leitura integral de `AGENTS.md`, `.env.local`, `system_prompt.md` e `prompts/dev.md` antes de codar.
+11. O Dev recebe instrucao explicita de que backend e banco sao Mitra: tabelas/DDL/SFs via `mitra-sdk` no `backend/`; frontend usa `mitra-interactions-sdk`; estado operacional nao fica em mock estatico ou `localStorage` como backend de produto.
+12. O Dev recebe instrucao explicita de commitar frontend e backend no git interno do projeto; se nao puder commitar, deve bloquear com `no_commit_reason`, patch/snapshot e lista de arquivos.
 
 Instrucao obrigatoria no prompt do Dev de cliente:
 
@@ -403,6 +444,7 @@ E proibido editar factory_control_project_dir, coordinator_dir e arquivos da fab
 Se product_project_dir apontar para a factory ou estiver ausente, registre bloqueio e pare.
 Antes de editar, registre HEAD, branch, git status e snapshot/diff se houver dirty tree.
 Ao terminar, entregue commit_hash. Se nao puder commitar, pare e entregue no_commit_reason com patch/snapshot.
+Backend/banco devem ser Mitra: tabelas e Server Functions criadas pelo backend com mitra-sdk. Frontend deve usar mitra-interactions-sdk para falar com o backend Mitra. Nao implemente backend de produto como mock estatico, localStorage operacional, JSON solto ou codigo dentro da factory.
 ```
 
 ---
@@ -644,6 +686,61 @@ Erro: Dev altera produto/factory sem commit, snapshot ou separacao de dirty tree
 Bloqueio: Lei 1.3 e Fase 4.
 
 Correto: antes do Dev, registrar HEAD/status/snapshot; depois do Dev, exigir commit hash ou bloqueio com `no_commit_reason`.
+
+### 14.10 Spawnar Coordenador sem projeto de produto pronto
+
+Erro: iniciar Coordenador antes de criar/selecionar projeto Mitra isolado dentro do workspace combinado.
+
+Bloqueio: Fase 0 e Gate 5.0.
+
+Correto: criar/selecionar projeto, preparar `product_project_dir`, validar `frontend/`, `backend/`, `.env.local`, git e arquivos Mitra antes do `tmux`.
+
+### 14.11 Coordenador sem leitura integral de `COORDINATOR.md`
+
+Erro: mandar o Coordenador agir com prompt parcial, resumo de Meta-Agent ou instrucoes improvisadas.
+
+Bloqueio: Fase 5.3.
+
+Correto: primeira mensagem manda ler `COORDINATOR.md` inteiro; o pacote local contem o arquivo canonico completo.
+
+### 14.12 Demorar varias tentativas para spawnar Coordenador
+
+Erro real observado: o Meta-Agent alternou entre atuar diretamente, esperar subagente longo, contaminar a conversa e reaproveitar ambiente errado, em vez de executar um checklist curto de spawn.
+
+Bloqueio: Gate 5.0, Fase 5.1, Fase 5.2 e Fase 5.3.
+
+Correto:
+
+1. preparar projeto isolado;
+2. preparar pacote do Coordenador;
+3. validar readiness JSON;
+4. iniciar `tmux`;
+5. mandar uma primeira mensagem curta;
+6. observar sem tomar o lugar do Coordenador.
+
+### 14.13 Dev no projeto errado
+
+Erro real observado: o Dev recebeu `workdir`, `frontend_dir` e `backend_dir` apontando para o projeto da factory `46955`.
+
+Bloqueio: Lei 1.2, Fase 0, Fase 4 e Gate 5.0.
+
+Correto: `runtime_contract.json` deve ter `product_project_id != 46955`, `product_project_dir` fora da factory, e `dev_forbidden_scope` contendo a factory.
+
+### 14.14 Dev sem backend/banco Mitra
+
+Erro: aceitar produto que roda como frontend isolado, mock, `localStorage` operacional ou sem tabelas/SFs Mitra.
+
+Bloqueio: Fase 4, instrucao obrigatoria do Dev e `prompts/coordinator.md` secao Desenvolvimento.
+
+Correto: backend via `mitra-sdk`, tabelas/SFs no projeto Mitra, frontend via `mitra-interactions-sdk`, smoke de SF e persistencia antes do handoff.
+
+### 14.15 Responder Telegram no canal errado
+
+Erro: Flavio pede resposta no Telegram e o Meta-Agent responde apenas no chat Codex.
+
+Bloqueio: Secao 11.
+
+Correto: verificar sender/bridge real de Telegram; se nao houver mecanismo disponivel, dizer explicitamente que nao consegue enviar pelo Telegram e responder no chat como fallback.
 
 ---
 
