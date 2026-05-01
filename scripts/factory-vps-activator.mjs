@@ -230,6 +230,7 @@ async function updateProjectStatus(row, status, nextStep, errorMessage = '') {
   const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
   const shortStatusByRegistry = {
     coordinator_tmux_started_waiting_telegram: 'coord_tmux_started',
+    coordinator_ready_waiting_telegram: 'coord_ready_waiting_tg',
     blocked_public_repo_unreachable: 'repo_unreachable',
     mitra_project_created_activation_requested: 'activation_requested',
   };
@@ -246,6 +247,106 @@ async function updateProjectStatus(row, status, nextStep, errorMessage = '') {
   if (row.PROJECT_BOT_TOKEN_SECRET_REF) {
     await dml(`UPDATE WRAPPER_REGISTRY SET STATUS=${sqlValue(registryStatus)}, UPDATED_AT=${sqlValue(now)} WHERE BOT_TOKEN_ENV=${sqlValue(row.PROJECT_BOT_TOKEN_SECRET_REF)}`);
   }
+}
+
+function validateAgentReadiness(actorDir, expectedAgentType, expectedMissionId) {
+  const file = `${actorDir}/outbox/agent_readiness.json`;
+  const errors = [];
+  if (!existsSync(file)) return { ok: false, pending: true, file, errors: ['missing readiness file'] };
+
+  let readiness;
+  try {
+    readiness = JSON.parse(readFileSync(file, 'utf8'));
+  } catch (error) {
+    return { ok: false, pending: false, file, errors: [`invalid readiness json: ${error?.message ?? String(error)}`] };
+  }
+
+  if (readiness.agent_type !== expectedAgentType) errors.push(`agent_type expected ${expectedAgentType}, got ${readiness.agent_type}`);
+  if (readiness.mission_id !== expectedMissionId) errors.push(`mission_id expected ${expectedMissionId}, got ${readiness.mission_id}`);
+  if (readiness.runtime_contract_loaded !== true) errors.push('runtime_contract_loaded must be true');
+  if (readiness.mission_loaded !== true) errors.push('mission_loaded must be true');
+  if (!Array.isArray(readiness.blocking_gaps) || readiness.blocking_gaps.length) errors.push('blocking_gaps must be an empty array');
+  if (!Array.isArray(readiness.read_files) || readiness.read_files.length < 5) errors.push('read_files must contain at least 5 files');
+
+  let hashesVerified = 0;
+  let bytesVerified = 0;
+  if (Array.isArray(readiness.read_files)) {
+    for (const entry of readiness.read_files) {
+      if (!entry?.path) {
+        errors.push('read_files entry missing path');
+        continue;
+      }
+      const path = String(entry.path).startsWith('/') ? String(entry.path) : resolve(actorDir, String(entry.path));
+      if (!existsSync(path)) {
+        errors.push(`read file missing on disk: ${path}`);
+        continue;
+      }
+      const actualBytes = bytes(path);
+      const actualSha = sha256(path);
+      if (entry.bytes !== actualBytes) errors.push(`byte mismatch for ${path}`);
+      else bytesVerified += 1;
+      if (entry.sha256 !== actualSha) errors.push(`sha256 mismatch for ${path}`);
+      else hashesVerified += 1;
+    }
+  }
+
+  return {
+    ok: errors.length === 0,
+    pending: false,
+    file,
+    errors,
+    rechecks: {
+      file_count: Array.isArray(readiness.read_files) ? readiness.read_files.length : 0,
+      hashes_verified: hashesVerified,
+      bytes_verified: bytesVerified,
+      blocking_gaps_empty: Array.isArray(readiness.blocking_gaps) && readiness.blocking_gaps.length === 0,
+    },
+  };
+}
+
+async function refreshReadyMetaAgents() {
+  const rows = await q(
+    "SELECT REQUEST_CODE, META_AGENT_CODE, META_AGENT_DIR, STATUS FROM META_AGENT_ACTIVATION_REQUESTS WHERE STATUS='tmux_started_reading_prompt' ORDER BY ID ASC LIMIT 20"
+  );
+  const results = [];
+  for (const row of rows) {
+    const readiness = validateAgentReadiness(row.META_AGENT_DIR, 'meta_agent', row.META_AGENT_CODE);
+    if (!readiness.ok) {
+      results.push({ ok: false, type: 'meta_agent_readiness', code: row.META_AGENT_CODE, pending: readiness.pending, errors: readiness.errors });
+      continue;
+    }
+    await updateMetaStatus(row, 'ready_waiting_telegram', 'Meta-Agent pronto em tmux; conversar via bot ou tmux.');
+    results.push({ ok: true, type: 'meta_agent_readiness', code: row.META_AGENT_CODE, status: 'ready_waiting_telegram', rechecks: readiness.rechecks });
+  }
+  return results;
+}
+
+async function refreshReadyProjectCoordinators() {
+  const rows = await q(
+    "SELECT REQUEST_CODE, REGISTRY_CODE, COORDINATOR_CODE, EXECUTION_CODE, PROJECT_BOT_TOKEN_SECRET_REF FROM FACTORY_PROJECT_REQUESTS WHERE STATUS='coordinator_tmux_started_waiting_telegram' ORDER BY ID ASC LIMIT 20"
+  );
+  const results = [];
+  for (const row of rows) {
+    const coordinatorDir = `${ROOT}/coordinators/${row.COORDINATOR_CODE}`;
+    const readiness = validateAgentReadiness(coordinatorDir, 'coordinator', row.EXECUTION_CODE);
+    if (!readiness.ok) {
+      results.push({ ok: false, type: 'coordinator_readiness', code: row.COORDINATOR_CODE, pending: readiness.pending, errors: readiness.errors });
+      continue;
+    }
+    await updateProjectStatus(row, 'coordinator_ready_waiting_telegram', 'Coordenador pronto em tmux; enviar primeira mensagem real ao bot do projeto.');
+    const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
+    await dml(
+      `UPDATE EXECUTIONS SET LAST_EVENT='Coordenador pronto em tmux e aguardando Telegram', NEXT_MISSION='Aguardar primeira mensagem real no bot do projeto', BLOCKERS='', ATUALIZADO_EM=${sqlValue(now)} WHERE EXECUTION_CODE=${sqlValue(row.EXECUTION_CODE)}`
+    );
+    await insertTimeline(
+      row.EXECUTION_CODE,
+      row.COORDINATOR_CODE,
+      'Coordenador pronto em tmux',
+      `Readiness schema-valid confirmado em ${coordinatorDir}/outbox/agent_readiness.json; aguardando primeira mensagem real no bot do projeto.`
+    );
+    results.push({ ok: true, type: 'coordinator_readiness', code: row.COORDINATOR_CODE, status: 'coordinator_ready_waiting_telegram', rechecks: readiness.rechecks });
+  }
+  return results;
 }
 
 async function insertTimeline(executionCode, coordinatorCode, title, description) {
@@ -623,6 +724,10 @@ async function activateProject(row, repo) {
 }
 
 async function processPending() {
+  const readinessResults = [
+    ...(await refreshReadyMetaAgents()),
+    ...(await refreshReadyProjectCoordinators()),
+  ];
   const metaRows = await q(
     "SELECT REQUEST_CODE, BOT_USERNAME, BOT_TOKEN_SECRET_REF, META_AGENT_CODE, META_AGENT_DIR, TMUX_SESSION, PROMPT_PATH, STATUS FROM META_AGENT_ACTIVATION_REQUESTS WHERE STATUS IN ('activation_requested','blocked_public_repo_unreachable') ORDER BY ID ASC LIMIT 5"
   );
@@ -630,7 +735,7 @@ async function processPending() {
     "SELECT REQUEST_CODE, IDEMPOTENCY_KEY, INSTANCE_CODE, PROJECT_NAME, TELEGRAM_BOT_REF, PROJECT_BOT_USERNAME, PROJECT_BOT_TOKEN_SECRET_REF, STATUS, WORKSPACE_ID, CREATED_PROJECT_ID, CREATED_PROJECT_DIR, REGISTRY_CODE, COORDINATOR_CODE, EXECUTION_CODE, NEXT_STEP, ERROR_MESSAGE, CREATED_AT, UPDATED_AT FROM FACTORY_PROJECT_REQUESTS WHERE STATUS IN ('mitra_project_created_activation_requested','blocked_public_repo_unreachable') ORDER BY ID ASC LIMIT 5"
   );
   const rows = [...metaRows, ...projectRows];
-  if (!rows.length) return { ok: true, processed: 0, results: [] };
+  if (!rows.length) return { ok: readinessResults.every((item) => item.ok || item.pending), processed: readinessResults.length, results: readinessResults };
 
   const repo = publicRepoSnapshot();
   if (!repo.ok) {
@@ -650,7 +755,8 @@ async function processPending() {
   const results = [];
   for (const row of metaRows) results.push(await activateMetaAgent(row, repo));
   for (const row of projectRows) results.push(await activateProject(row, repo));
-  return { ok: results.every((item) => item.ok), processed: results.length, canonical_repo_head: repo.head, results };
+  const allResults = [...readinessResults, ...results];
+  return { ok: allResults.every((item) => item.ok || item.pending), processed: allResults.length, canonical_repo_head: repo.head, results: allResults };
 }
 
 async function sleep(ms) {
