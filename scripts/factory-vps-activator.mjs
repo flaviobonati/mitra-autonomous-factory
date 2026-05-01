@@ -172,6 +172,16 @@ async function materializeMetaAgentOneTimeSecret(row) {
   return { materialized: true, secret_ref: row.BOT_TOKEN_SECRET_REF, secret_file: secretFile };
 }
 
+async function materializeProjectOneTimeSecret(row) {
+  const oneTimeToken = String(row.PROJECT_BOT_TOKEN_ONETIME_SECRET ?? '').trim();
+  if (!oneTimeToken) return { materialized: false };
+  const secretFile = writeTelegramSecretRef(row.PROJECT_BOT_TOKEN_SECRET_REF, oneTimeToken);
+  await dml(
+    `UPDATE FACTORY_PROJECT_REQUESTS SET PROJECT_BOT_TOKEN_ONETIME_SECRET='', UPDATED_AT=${sqlValue(new Date().toISOString().slice(0, 19).replace('T', ' '))} WHERE REQUEST_CODE=${sqlValue(row.REQUEST_CODE)}`
+  );
+  return { materialized: true, secret_ref: row.PROJECT_BOT_TOKEN_SECRET_REF, secret_file: secretFile };
+}
+
 async function validateTelegramBot(secretRef, expectedBotRef) {
   const expected = String(expectedBotRef || '').replace(/^@/, '').toLowerCase();
   const botToken = tokenFromSecretRef(secretRef);
@@ -699,6 +709,7 @@ async function activateMetaAgent(row, repo) {
 
 async function activateProject(row, repo) {
   try {
+    await materializeProjectOneTimeSecret(row);
     const botReadiness = await validateTelegramBot(row.PROJECT_BOT_TOKEN_SECRET_REF, row.PROJECT_BOT_USERNAME || row.TELEGRAM_BOT_REF);
     const product = ensureProductProject(row, repo.path);
     const coordinator = copyCoordinatorPackage(row, repo.path, product, botReadiness);
@@ -757,7 +768,7 @@ async function processPending() {
     "SELECT REQUEST_CODE, BOT_USERNAME, BOT_TOKEN_SECRET_REF, BOT_TOKEN_ONETIME_SECRET, META_AGENT_CODE, META_AGENT_DIR, TMUX_SESSION, PROMPT_PATH, STATUS FROM META_AGENT_ACTIVATION_REQUESTS WHERE STATUS IN ('activation_requested','blocked_public_repo_unreachable') ORDER BY ID ASC LIMIT 5"
   );
   const projectRows = await q(
-    "SELECT REQUEST_CODE, IDEMPOTENCY_KEY, INSTANCE_CODE, PROJECT_NAME, TELEGRAM_BOT_REF, PROJECT_BOT_USERNAME, PROJECT_BOT_TOKEN_SECRET_REF, STATUS, WORKSPACE_ID, CREATED_PROJECT_ID, CREATED_PROJECT_DIR, REGISTRY_CODE, COORDINATOR_CODE, EXECUTION_CODE, NEXT_STEP, ERROR_MESSAGE, CREATED_AT, UPDATED_AT FROM FACTORY_PROJECT_REQUESTS WHERE STATUS IN ('mitra_project_created_activation_requested','blocked_public_repo_unreachable') ORDER BY ID ASC LIMIT 5"
+    "SELECT REQUEST_CODE, IDEMPOTENCY_KEY, INSTANCE_CODE, PROJECT_NAME, TELEGRAM_BOT_REF, PROJECT_BOT_USERNAME, PROJECT_BOT_TOKEN_SECRET_REF, PROJECT_BOT_TOKEN_ONETIME_SECRET, STATUS, WORKSPACE_ID, CREATED_PROJECT_ID, CREATED_PROJECT_DIR, REGISTRY_CODE, COORDINATOR_CODE, EXECUTION_CODE, NEXT_STEP, ERROR_MESSAGE, CREATED_AT, UPDATED_AT FROM FACTORY_PROJECT_REQUESTS WHERE STATUS IN ('mitra_project_created_activation_requested','blocked_public_repo_unreachable') ORDER BY ID ASC LIMIT 5"
   );
   const rows = [...metaRows, ...projectRows];
   if (!rows.length) return { ok: readinessResults.every((item) => item.ok || item.pending), processed: readinessResults.length, results: readinessResults };
