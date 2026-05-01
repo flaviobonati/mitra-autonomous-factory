@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import {
   cpSync,
   existsSync,
+  chmodSync,
   mkdirSync,
   readdirSync,
   readFileSync,
@@ -146,6 +147,29 @@ function tokenFromSecretRef(ref) {
     return parseEnvValue(content, 'TELEGRAM_BOT_TOKEN') || parseEnvValue(content, ref) || content.trim();
   }
   throw new Error(`Missing Telegram token secret ref: ${ref}`);
+}
+
+function writeTelegramSecretRef(ref, tokenValue) {
+  const cleanRef = String(ref ?? '').trim();
+  const cleanToken = String(tokenValue ?? '').trim();
+  if (!/^[a-zA-Z0-9_.-]{3,120}$/.test(cleanRef)) throw new Error(`Invalid Telegram token secret ref: ${cleanRef}`);
+  if (!/^[0-9]{6,}:[A-Za-z0-9_-]{20,}$/.test(cleanToken)) throw new Error('Invalid Telegram bot token format');
+  const secretsDir = `${ROOT}/secrets`;
+  const secretFile = `${secretsDir}/${cleanRef}.env`;
+  mkdirSync(secretsDir, { recursive: true, mode: 0o700 });
+  writeFileSync(secretFile, `TELEGRAM_BOT_TOKEN=${cleanToken}\n`, { mode: 0o600 });
+  chmodSync(secretFile, 0o600);
+  return secretFile;
+}
+
+async function materializeMetaAgentOneTimeSecret(row) {
+  const oneTimeToken = String(row.BOT_TOKEN_ONETIME_SECRET ?? '').trim();
+  if (!oneTimeToken) return { materialized: false };
+  const secretFile = writeTelegramSecretRef(row.BOT_TOKEN_SECRET_REF, oneTimeToken);
+  await dml(
+    `UPDATE META_AGENT_ACTIVATION_REQUESTS SET BOT_TOKEN_ONETIME_SECRET='', UPDATED_AT=${sqlValue(new Date().toISOString().slice(0, 19).replace('T', ' '))} WHERE REQUEST_CODE=${sqlValue(row.REQUEST_CODE)}`
+  );
+  return { materialized: true, secret_ref: row.BOT_TOKEN_SECRET_REF, secret_file: secretFile };
 }
 
 async function validateTelegramBot(secretRef, expectedBotRef) {
@@ -598,6 +622,7 @@ function startCodexTmuxIfMissing(session, cwd, promptFile, logFile, logLabel) {
 
 async function activateMetaAgent(row, repo) {
   try {
+    await materializeMetaAgentOneTimeSecret(row);
     await validateTelegramBot(row.BOT_TOKEN_SECRET_REF, row.BOT_USERNAME);
     const mitraBaseDir = mitraAgentSourceDir(repo.path);
     const metaAgentDir = row.META_AGENT_DIR;
@@ -729,7 +754,7 @@ async function processPending() {
     ...(await refreshReadyProjectCoordinators()),
   ];
   const metaRows = await q(
-    "SELECT REQUEST_CODE, BOT_USERNAME, BOT_TOKEN_SECRET_REF, META_AGENT_CODE, META_AGENT_DIR, TMUX_SESSION, PROMPT_PATH, STATUS FROM META_AGENT_ACTIVATION_REQUESTS WHERE STATUS IN ('activation_requested','blocked_public_repo_unreachable') ORDER BY ID ASC LIMIT 5"
+    "SELECT REQUEST_CODE, BOT_USERNAME, BOT_TOKEN_SECRET_REF, BOT_TOKEN_ONETIME_SECRET, META_AGENT_CODE, META_AGENT_DIR, TMUX_SESSION, PROMPT_PATH, STATUS FROM META_AGENT_ACTIVATION_REQUESTS WHERE STATUS IN ('activation_requested','blocked_public_repo_unreachable') ORDER BY ID ASC LIMIT 5"
   );
   const projectRows = await q(
     "SELECT REQUEST_CODE, IDEMPOTENCY_KEY, INSTANCE_CODE, PROJECT_NAME, TELEGRAM_BOT_REF, PROJECT_BOT_USERNAME, PROJECT_BOT_TOKEN_SECRET_REF, STATUS, WORKSPACE_ID, CREATED_PROJECT_ID, CREATED_PROJECT_DIR, REGISTRY_CODE, COORDINATOR_CODE, EXECUTION_CODE, NEXT_STEP, ERROR_MESSAGE, CREATED_AT, UPDATED_AT FROM FACTORY_PROJECT_REQUESTS WHERE STATUS IN ('mitra_project_created_activation_requested','blocked_public_repo_unreachable') ORDER BY ID ASC LIMIT 5"
