@@ -193,7 +193,9 @@ async function validateTelegramBot(secretRef, expectedBotRef) {
   const json = await response.json();
   if (!json.ok) throw new Error(`Telegram getMe failed for secret ref ${secretRef}: ${json.description || 'telegram_error'}`);
   const actual = String(json.result?.username || '').toLowerCase();
-  if (expected && actual !== expected) {
+  const expectedBase = expected.replace(/_?bot$/, '');
+  const actualBase = actual.replace(/_?bot$/, '');
+  if (expected && actual !== expected && actualBase !== expectedBase) {
     throw new Error(`Telegram bot mismatch for secret ref ${secretRef}: expected @${expected}, got @${actual}`);
   }
   return { username: `@${json.result?.username || ''}`, id: json.result?.id, token_status: 'present_redacted' };
@@ -711,6 +713,18 @@ async function activateProject(row, repo) {
   try {
     await materializeProjectOneTimeSecret(row);
     const botReadiness = await validateTelegramBot(row.PROJECT_BOT_TOKEN_SECRET_REF, row.PROJECT_BOT_USERNAME || row.TELEGRAM_BOT_REF);
+    if (botReadiness.username && botReadiness.username !== (row.PROJECT_BOT_USERNAME || row.TELEGRAM_BOT_REF)) {
+      row.PROJECT_BOT_USERNAME = botReadiness.username;
+      row.TELEGRAM_BOT_REF = botReadiness.username;
+      await dml(
+        `UPDATE FACTORY_PROJECT_REQUESTS SET PROJECT_BOT_USERNAME=${sqlValue(botReadiness.username)}, TELEGRAM_BOT_REF=${sqlValue(botReadiness.username)}, UPDATED_AT=${sqlValue(new Date().toISOString().slice(0, 19).replace('T', ' '))} WHERE REQUEST_CODE=${sqlValue(row.REQUEST_CODE)}`
+      );
+      if (row.COORDINATOR_CODE) {
+        await dml(
+          `UPDATE COORDINATORS SET TELEGRAM_BOT=${sqlValue(botReadiness.username)}, TELEGRAM_CHANNEL=${sqlValue(botReadiness.username)} WHERE CODE=${sqlValue(row.COORDINATOR_CODE)}`
+        );
+      }
+    }
     const product = ensureProductProject(row, repo.path);
     const coordinator = copyCoordinatorPackage(row, repo.path, product, botReadiness);
 
