@@ -222,10 +222,10 @@ async function updateProjectStatus(row, status, nextStep, errorMessage = '') {
     await dml(`UPDATE PROJECT_REGISTRY SET STATUS=${sqlValue(registryStatus)}, UPDATED_AT=${sqlValue(now)} WHERE REGISTRY_CODE=${sqlValue(row.REGISTRY_CODE)}`);
   }
   if (row.COORDINATOR_CODE) {
-    await dml(`UPDATE COORDINATOR_REGISTRY SET STATUS=${sqlValue(status)}, UPDATED_AT=${sqlValue(now)} WHERE COORDINATOR_CODE=${sqlValue(row.COORDINATOR_CODE)}`);
+    await dml(`UPDATE COORDINATOR_REGISTRY SET STATUS=${sqlValue(registryStatus)}, UPDATED_AT=${sqlValue(now)} WHERE COORDINATOR_CODE=${sqlValue(row.COORDINATOR_CODE)}`);
   }
   if (row.PROJECT_BOT_TOKEN_SECRET_REF) {
-    await dml(`UPDATE WRAPPER_REGISTRY SET STATUS=${sqlValue(status)}, UPDATED_AT=${sqlValue(now)} WHERE BOT_TOKEN_ENV=${sqlValue(row.PROJECT_BOT_TOKEN_SECRET_REF)}`);
+    await dml(`UPDATE WRAPPER_REGISTRY SET STATUS=${sqlValue(registryStatus)}, UPDATED_AT=${sqlValue(now)} WHERE BOT_TOKEN_ENV=${sqlValue(row.PROJECT_BOT_TOKEN_SECRET_REF)}`);
   }
 }
 
