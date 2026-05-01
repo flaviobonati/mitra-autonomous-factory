@@ -453,7 +453,8 @@ function copyCoordinatorPackage(row, repoDir, product, botReadiness) {
 
   const bootPrompt = [
     'Leia COORDINATOR.md inteiro antes de agir.',
-    'Depois escreva outbox/agent_readiness.json com agent_type=coordinator, prompt_path, prompt_sha256, prompt_bytes, read_complete=true, runtime_contract_loaded=true.',
+    'Depois escreva outbox/agent_readiness.json obedecendo exatamente schemas/agent_readiness.schema.json.',
+    `Campos obrigatorios: agent_type="coordinator", mission_id="${executionCode}", runtime_contract_loaded=true, mission_loaded=true, blocking_gaps=[], read_files[] com path, sha256 e bytes de COORDINATOR.md, runtime_contract.json, boot_prompt.md, prompt-manifest.json e mitra-agent-minimal/system_prompt.md.`,
     'Use runtime_contract.json. Aguarde mensagens reais do Telegram do bot do projeto; nao invente usuario.',
     'Todo evento e toda proxima missao precisam passar pelo Sistema Central via factory-gateway.mjs.',
     'O Meta-Agent nao e Coordenador desta run.',
@@ -546,7 +547,8 @@ async function activateMetaAgent(row, repo) {
     const bootPrompt = [
       'Leia META_AGENT.md inteiro antes de agir.',
       'Leia tambem COORDINATOR.md, prompt-manifest.json, docs/, schemas/ e mitra-agent-minimal/ para entender como a fabrica desenvolve no Mitra.',
-      'Depois escreva outbox/agent_readiness.json com agent_type=meta_agent, prompt_path, prompt_sha256, prompt_bytes, coordinator_context_loaded=true, mitra_agent_minimal_loaded=true, read_complete=true.',
+      'Depois escreva outbox/agent_readiness.json obedecendo exatamente schemas/agent_readiness.schema.json.',
+      'Campos obrigatorios: agent_type="meta_agent", mission_id=meta_agent_code, runtime_contract_loaded=true, mission_loaded=true, blocking_gaps=[], read_files[] com path, sha256 e bytes de META_AGENT.md, COORDINATOR.md, runtime_contract.json, prompt-manifest.json e mitra-agent-minimal/system_prompt.md.',
       'Use runtime_contract.json para Telegram, paths e limites.',
       'Voce e o Meta-Agent desta fabrica. Nao seja Coordenador de run. Aguarde mensagens do Telegram ou instrucoes do Flavio.',
     ].join('\n');
