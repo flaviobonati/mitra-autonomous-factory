@@ -368,6 +368,8 @@ function copyCoordinatorPackage(row, repoDir, product, botReadiness) {
     product_frontend_dir: `${product.projectDir}/frontend`,
     product_backend_dir: `${product.projectDir}/backend`,
     product_git_head: product.gitHead,
+    dev_write_scope: ['product_project_dir'],
+    dev_forbidden_scope: ['factory_control_project_dir', 'coordinator_dir', 'other_product_project_dirs'],
     project_bot_username: row.PROJECT_BOT_USERNAME || row.TELEGRAM_BOT_REF,
     project_bot_token_secret_ref: row.PROJECT_BOT_TOKEN_SECRET_REF,
     telegram_bot_get_me: botReadiness,
