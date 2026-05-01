@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mitra.factory/schemas/v2/factory_instance_config.schema.json",
+  "title": "Factory Instance Config v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "factory_instance_code",
+    "root_dir",
+    "mitra",
+    "factory_control_project",
+    "product_project_defaults",
+    "coordinator_defaults",
+    "telegram_wrapper",
+    "ui_project_creation",
+    "safety"
+  ],
+  "properties": {
+    "schema_version": { "const": "factory.v2" },
+    "factory_instance_code": { "type": "string", "pattern": "^[a-z0-9][a-z0-9_-]{2,80}$" },
+    "root_dir": { "type": "string", "minLength": 1 },
+    "mitra": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["base_url", "integrations_url", "workspace_id", "token_env", "env_file"],
+      "properties": {
+        "base_url": { "type": "string", "minLength": 1 },
+        "integrations_url": { "type": "string", "minLength": 1 },
+        "workspace_id": { "type": "string", "pattern": "^[0-9]+$" },
+        "token_env": { "type": "string", "pattern": "^[A-Z0-9_]+$" },
+        "env_file": { "type": "string", "minLength": 1 }
+      }
+    },
+    "factory_control_project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["project_id", "project_dir", "gateway_path", "server_functions"],
+      "properties": {
+        "project_id": { "type": "string", "pattern": "^[0-9]+$" },
+        "project_dir": { "type": "string", "minLength": 1 },
+        "gateway_path": { "type": "string", "minLength": 1 },
+        "server_functions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["exchange_event"],
+          "properties": {
+            "exchange_event": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["name", "id_file", "setup_script"],
+              "properties": {
+                "name": { "const": "af_exchange_event" },
+                "id": { "type": ["string", "number"] },
+                "id_file": { "type": "string", "minLength": 1 },
+                "setup_script": { "type": "string", "minLength": 1 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "product_project_defaults": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name_prefix", "template_dir", "mitra_agent_dir"],
+      "properties": {
+        "name_prefix": { "type": "string", "minLength": 1 },
+        "template_dir": { "type": "string", "minLength": 1 },
+        "mitra_agent_dir": { "type": "string", "minLength": 1 }
+      }
+    },
+    "coordinator_defaults": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dir_root", "model", "session_runtime", "package_source_dir"],
+      "properties": {
+        "dir_root": { "type": "string", "minLength": 1 },
+        "model": { "const": "gpt-5.5" },
+        "session_runtime": { "const": "tmux" },
+        "package_source_dir": { "type": "string", "minLength": 1 }
+      }
+    },
+    "telegram_wrapper": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "inbox_dir", "send_command", "bot_token_env"],
+      "properties": {
+        "type": { "const": "telegram" },
+        "inbox_dir": { "type": "string", "minLength": 1 },
+        "send_command": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "bot_token_env": { "type": "string", "pattern": "^[A-Z0-9_]+$" },
+        "webhook_url": { "type": "string" }
+      }
+    },
+    "ui_project_creation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["allowed_fields", "forbidden_fields", "creates_product_project_in_configured_workspace", "initial_message_required"],
+      "properties": {
+        "allowed_fields": {
+          "type": "array",
+          "items": { "enum": ["project_name", "telegram_bot_ref"] }
+        },
+        "forbidden_fields": {
+          "type": "array",
+          "items": { "enum": ["domain", "workspace_id", "factory_project_id", "coordinator_model", "initial_request_type", "initial_intent_message", "vps_config"] }
+        },
+        "creates_product_project_in_configured_workspace": { "const": true },
+        "initial_message_required": { "const": false }
+      }
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["forbidden_product_project_ids", "require_product_git", "require_project_registry_before_run", "allow_meta_agent_operational_events"],
+      "properties": {
+        "forbidden_product_project_ids": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[0-9]+$" }
+        },
+        "require_product_git": { "const": true },
+        "require_project_registry_before_run": { "const": true },
+        "allow_meta_agent_operational_events": { "const": false }
+      }
+    }
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "schema_version": "factory.v2",
+  "factory_instance_code": "my_factory_instance",
+  "root_dir": "/opt/mitra-factory",
+  "mitra": {
+    "base_url": "https://newmitra.mitrasheet.com:8080",
+    "integrations_url": "https://newmitra.mitrasheet.com:8080",
+    "workspace_id": "00000",
+    "token_env": "MITRA_TOKEN",
+    "env_file": "/opt/mitra-factory/.factory.env"
+  },
+  "factory_control_project": {
+    "project_id": "00000",
+    "project_dir": "/opt/mitra-factory/workspaces/w-00000/p-00000",
+    "gateway_path": "/opt/mitra-factory/workspaces/w-00000/p-00000/backend/factory-gateway.mjs",
+    "server_functions": {
+      "exchange_event": {
+        "name": "af_exchange_event",
+        "id_file": "/opt/mitra-factory/workspaces/w-00000/p-00000/backend/write-server-functions.json",
+        "setup_script": "/opt/mitra-factory/workspaces/w-00000/p-00000/backend/setup-write-sfs.mjs"
+      }
+    }
+  },
+  "product_project_defaults": {
+    "name_prefix": "Mitra Factory Product",
+    "template_dir": "/opt/mitra-factory/template",
+    "mitra_agent_dir": "/opt/mitra-factory/mitra-agent-minimal"
+  },
+  "coordinator_defaults": {
+    "dir_root": "/opt/mitra-factory/coordinators",
+    "model": "gpt-5.5",
+    "session_runtime": "tmux",
+    "package_source_dir": "/opt/mitra-factory/mitra-autonomous-factory"
+  },
+  "telegram_wrapper": {
+    "type": "telegram",
+    "inbox_dir": "/opt/mitra-factory/telegram_msgs",
+    "send_command": ["node", "/opt/mitra-factory/tg.mjs", "{message}"],
+    "bot_token_env": "TELEGRAM_BOT_TOKEN",
+    "webhook_url": ""
+  },
+  "ui_project_creation": {
+    "allowed_fields": ["project_name", "telegram_bot_ref"],
+    "forbidden_fields": ["domain", "workspace_id", "factory_project_id", "coordinator_model", "initial_request_type", "initial_intent_message", "vps_config"],
+    "creates_product_project_in_configured_workspace": true,
+    "initial_message_required": false
+  },
+  "safety": {
+    "forbidden_product_project_ids": ["00000"],
+    "require_product_git": true,
+    "require_project_registry_before_run": true,
+    "allow_meta_agent_operational_events": false
+  }
+}
