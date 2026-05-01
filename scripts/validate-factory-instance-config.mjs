@@ -62,9 +62,17 @@ function usableSecret(value) {
   return Boolean(value && !value.includes('RUNTIME_SECRET') && value !== '<secret>');
 }
 
+function looksLikeRawTelegramToken(value) {
+  return typeof value === 'string' && /^[0-9]{6,}:[A-Za-z0-9_-]{20,}$/.test(value.trim());
+}
+
 mustString('schema_version', config.schema_version);
 mustString('factory_instance_code', config.factory_instance_code);
 mustString('root_dir', config.root_dir);
+mustString('canonical_repo.url', config.canonical_repo?.url);
+mustString('canonical_repo.ref', config.canonical_repo?.ref);
+mustString('canonical_repo.local_dir', config.canonical_repo?.local_dir);
+mustString('canonical_repo.prompt_manifest_path', config.canonical_repo?.prompt_manifest_path);
 mustString('mitra.base_url', config.mitra?.base_url);
 mustString('mitra.integrations_url', config.mitra?.integrations_url);
 mustString('mitra.workspace_id', config.mitra?.workspace_id);
@@ -73,6 +81,13 @@ mustString('mitra.env_file', config.mitra?.env_file);
 mustString('factory_control_project.project_id', config.factory_control_project?.project_id);
 mustString('factory_control_project.project_dir', config.factory_control_project?.project_dir);
 mustString('factory_control_project.gateway_path', config.factory_control_project?.gateway_path);
+mustString('meta_agent.bot_username', config.meta_agent?.bot_username);
+mustString('meta_agent.bot_token_secret_ref', config.meta_agent?.bot_token_secret_ref);
+mustString('meta_agent.dir_root', config.meta_agent?.dir_root);
+mustString('meta_agent.model', config.meta_agent?.model);
+mustString('meta_agent.session_runtime', config.meta_agent?.session_runtime);
+mustString('meta_agent.prompt_path', config.meta_agent?.prompt_path);
+mustString('meta_agent.heartbeat_path', config.meta_agent?.heartbeat_path);
 mustString('coordinator_defaults.model', config.coordinator_defaults?.model);
 mustString('coordinator_defaults.session_runtime', config.coordinator_defaults?.session_runtime);
 mustString('telegram_wrapper.type', config.telegram_wrapper?.type);
@@ -80,6 +95,11 @@ mustArray('ui_project_creation.allowed_fields', config.ui_project_creation?.allo
 mustArray('ui_project_creation.forbidden_fields', config.ui_project_creation?.forbidden_fields);
 
 if (config.schema_version !== 'factory.v2') fail('schema_version must be factory.v2');
+if (config.canonical_repo && Object.hasOwn(config.canonical_repo, 'visibility')) fail('canonical_repo.visibility is forbidden: the factory canonical repo must be public');
+if (config.canonical_repo && Object.hasOwn(config.canonical_repo, 'auth_secret_ref')) fail('canonical_repo.auth_secret_ref is forbidden: Criar Projeto must pull from the public canonical repo without PAT');
+if (!String(config.canonical_repo?.url ?? '').startsWith('https://github.com/')) fail('canonical_repo.url must be a public HTTPS GitHub URL');
+if (config.meta_agent?.model !== 'gpt-5.5') fail('meta_agent.model must be gpt-5.5');
+if (config.meta_agent?.session_runtime !== 'tmux') fail('meta_agent.session_runtime must be tmux');
 if (config.coordinator_defaults?.model !== 'gpt-5.5') fail('coordinator_defaults.model must be gpt-5.5');
 if (config.coordinator_defaults?.session_runtime !== 'tmux') fail('coordinator_defaults.session_runtime must be tmux');
 if (config.telegram_wrapper?.type !== 'telegram') fail('telegram_wrapper.type must be telegram');
@@ -88,13 +108,16 @@ if (config.ui_project_creation?.initial_message_required !== false) fail('UI pro
 if (config.safety?.allow_meta_agent_operational_events !== false) fail('Meta-Agent operational events must be forbidden');
 if (config.safety?.require_project_registry_before_run !== true) fail('Project Registry must be required before run');
 if (config.safety?.require_product_git !== true) fail('Product git must be required');
+if (!/^@[A-Za-z0-9_]{5,32}$/.test(String(config.meta_agent?.bot_username ?? ''))) fail('meta_agent.bot_username must be a Telegram @username');
+if (looksLikeRawTelegramToken(config.meta_agent?.bot_token_secret_ref)) fail('meta_agent.bot_token_secret_ref must be a secret/env reference, not a raw Telegram token');
 
 const allowed = new Set(config.ui_project_creation?.allowed_fields ?? []);
 const forbidden = new Set(config.ui_project_creation?.forbidden_fields ?? []);
-for (const field of ['project_name', 'telegram_bot_ref']) {
+for (const field of ['project_name', 'project_bot_username', 'project_bot_token_secret_ref']) {
   if (!allowed.has(field)) fail(`UI allowed_fields must include ${field}`);
 }
-for (const field of ['domain', 'workspace_id', 'factory_project_id', 'coordinator_model', 'initial_request_type', 'initial_intent_message', 'vps_config']) {
+if (allowed.has('telegram_bot_ref')) fail('UI allowed_fields must split telegram_bot_ref into project_bot_username and project_bot_token_secret_ref');
+for (const field of ['domain', 'workspace_id', 'factory_project_id', 'coordinator_model', 'initial_request_type', 'initial_intent_message', 'vps_config', 'raw_bot_token']) {
   if (!forbidden.has(field)) fail(`UI forbidden_fields must include ${field}`);
   if (allowed.has(field)) fail(`UI allowed_fields must not include forbidden field ${field}`);
 }
@@ -104,6 +127,8 @@ const forbiddenProductIds = new Set((config.safety?.forbidden_product_project_id
 if (!forbiddenProductIds.has(factoryProjectId)) fail('safety.forbidden_product_project_ids must include factory_control_project.project_id');
 
 mustExist(config.root_dir, 'root_dir');
+mustExist(config.canonical_repo?.local_dir, 'canonical_repo.local_dir');
+mustExist(config.canonical_repo?.prompt_manifest_path, 'canonical_repo.prompt_manifest_path');
 mustExist(config.mitra?.env_file, 'mitra.env_file');
 mustExist(config.factory_control_project?.project_dir, 'factory_control_project.project_dir');
 mustExist(config.factory_control_project?.gateway_path, 'factory_control_project.gateway_path');
@@ -111,6 +136,8 @@ mustExist(config.factory_control_project?.server_functions?.exchange_event?.id_f
 mustExist(config.factory_control_project?.server_functions?.exchange_event?.setup_script, 'exchange_event.setup_script');
 mustExist(config.product_project_defaults?.template_dir, 'product_project_defaults.template_dir');
 mustExist(config.product_project_defaults?.mitra_agent_dir, 'product_project_defaults.mitra_agent_dir');
+if (modeArg === 'local') mustExist(config.meta_agent?.dir_root, 'meta_agent.dir_root');
+mustExist(config.meta_agent?.prompt_path, 'meta_agent.prompt_path');
 mustExist(config.coordinator_defaults?.dir_root, 'coordinator_defaults.dir_root');
 mustExist(config.coordinator_defaults?.package_source_dir, 'coordinator_defaults.package_source_dir');
 mustExist(config.telegram_wrapper?.inbox_dir, 'telegram_wrapper.inbox_dir');
@@ -175,11 +202,17 @@ const result = {
   errors,
   evidence,
   rechecks: {
+    canonical_repo_configured: Boolean(config.canonical_repo?.url && config.canonical_repo?.ref && config.canonical_repo?.local_dir),
+    canonical_repo_public_https_no_auth: String(config.canonical_repo?.url ?? '').startsWith('https://github.com/') && !Object.hasOwn(config.canonical_repo ?? {}, 'visibility') && !Object.hasOwn(config.canonical_repo ?? {}, 'auth_secret_ref'),
+    prompt_manifest_exists: Boolean(config.canonical_repo?.prompt_manifest_path && existsSync(config.canonical_repo.prompt_manifest_path)),
+    meta_agent_bot_username_configured: /^@[A-Za-z0-9_]{5,32}$/.test(String(config.meta_agent?.bot_username ?? '')),
+    meta_agent_secret_ref_redacted: Boolean(config.meta_agent?.bot_token_secret_ref && !looksLikeRawTelegramToken(config.meta_agent.bot_token_secret_ref)),
+    meta_agent_tmux_runtime: config.meta_agent?.session_runtime === 'tmux',
     env_file_workspace_matches_config: envFileWorkspaceMatches,
     env_file_base_url_matches_config: envFileBaseUrlMatches,
     token_available_redacted: tokenAvailable,
-    ui_only_allows_project_name_and_telegram_bot_ref: allowed.size === 2 && allowed.has('project_name') && allowed.has('telegram_bot_ref'),
-    ui_forbids_workspace_model_initial_type_and_vps: ['workspace_id', 'coordinator_model', 'initial_request_type', 'initial_intent_message', 'vps_config'].every((field) => forbidden.has(field)),
+    ui_only_allows_project_name_bot_username_and_secret_ref: allowed.size === 3 && allowed.has('project_name') && allowed.has('project_bot_username') && allowed.has('project_bot_token_secret_ref'),
+    ui_forbids_workspace_model_initial_type_vps_and_raw_token: ['workspace_id', 'coordinator_model', 'initial_request_type', 'initial_intent_message', 'vps_config', 'raw_bot_token'].every((field) => forbidden.has(field)),
     factory_project_forbidden_as_product: forbiddenProductIds.has(factoryProjectId),
     registry_required_before_run: config.safety?.require_project_registry_before_run === true,
     tmux_available: evidence.some((item) => item.startsWith('tmux available'))

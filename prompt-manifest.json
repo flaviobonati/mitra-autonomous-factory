@@ -1,0 +1,178 @@
+{
+  "schema_version": "prompt_manifest.v1",
+  "generated_at": "2026-05-01T12:58:32.834Z",
+  "status": "draft_current_worktree",
+  "repo_head_at_generation": "26b56988ebbac69740156aef5f668f42a0917cf9",
+  "note": "Hashes are for the current working tree. A friend-ready release must regenerate this manifest from a clean committed ref.",
+  "required_files": [
+    {
+      "path": "prompts/meta-agent.md",
+      "role": "meta_agent",
+      "sha256": "89754e6c7c9ba4c22480203628ec874afcc077776fa223fe2ffdc21d78ab68f6",
+      "bytes": 66366
+    },
+    {
+      "path": "prompts/coordinator.md",
+      "role": "coordinator",
+      "sha256": "3a160e2240648a136c876ed6637bdc7af08eba9a92bfe81ecbd55a7fc06e1ed1",
+      "bytes": 39084
+    },
+    {
+      "path": "prompts/researcher.md",
+      "role": "researcher",
+      "sha256": "30df1206a5d98f601a949f80fd777fb7ed19c7ffae9950d545f50e3ef7936883",
+      "bytes": 35565
+    },
+    {
+      "path": "prompts/dev.md",
+      "role": "dev",
+      "sha256": "1286cd3cd7342c4b349ea5daa27241cb4871bb4649c9fd7f2d8d56e5d5a8b43c",
+      "bytes": 57656
+    },
+    {
+      "path": "prompts/qa-core.md",
+      "role": "qa",
+      "sha256": "0c814674f2c2e140194bfbd75d115197a63b990dd302cdf34caed9d3d57aa283",
+      "bytes": 31170
+    },
+    {
+      "path": "prompts/qa-horizontal.md",
+      "role": "qa_horizontal",
+      "sha256": "2ed34b38fa8bbf49a66c4443c41d6571a8e6c436ded9f9fa9373584d0349bda5",
+      "bytes": 6481
+    },
+    {
+      "path": "prompts/qa-story.md",
+      "role": "qa_story",
+      "sha256": "abfe94fae025aee5641326eb2397c64f7a0c9a7ed1f1c6efd58fb11ddc0b86d4",
+      "bytes": 15432
+    },
+    {
+      "path": "prompts/qa-consolidator.md",
+      "role": "qa_consolidator",
+      "sha256": "05c49a193cc4ea4a741eb4f2815ecca2856779cf2ffc860795cdf537043e1a40",
+      "bytes": 2052
+    },
+    {
+      "path": "docs/context-delivery.md",
+      "role": "context_delivery",
+      "sha256": "1d7fcfa1d1724d377b6e0f2094f4d85fc71340467ed3b26f42610896b053c4a7",
+      "bytes": 2223
+    },
+    {
+      "path": "docs/new-run-readiness-gates.md",
+      "role": "readiness_gates",
+      "sha256": "2a9f590350b7165b343dff951a18d33c78c97a17d7eaa08056a838c5e8a09cd5",
+      "bytes": 7337
+    },
+    {
+      "path": "docs/initial_scope_artifact_templates.md",
+      "role": "scope_templates",
+      "sha256": "539710178cc71428fd5a9c18812c7ccabb40a4a7ef23e16e9f225a82e254d844",
+      "bytes": 5625
+    },
+    {
+      "path": "docs/portable-factory-bootstrap.md",
+      "role": "portable_bootstrap_contract",
+      "sha256": "0f57a7dc9aea32dcf4d5fe1d645c77e55b40600bf8f05cb6b344433269a09f57",
+      "bytes": 12992
+    },
+    {
+      "path": "schemas/v2/factory_instance_config.schema.json",
+      "role": "schema",
+      "sha256": "7f5692dd157967e5c660734d68be72e63b7fa3670c7d0a6120ecf368535e9aba",
+      "bytes": 6239
+    },
+    {
+      "path": "schemas/next_mission.schema.json",
+      "role": "schema",
+      "sha256": "c850ac1223f8e9c34c020f204972f708cf34039bc1a602964298d9fc8b74bab1",
+      "bytes": 3112
+    },
+    {
+      "path": "schemas/coordinator_spawn_readiness.schema.json",
+      "role": "schema",
+      "sha256": "ab5ea894b8eac4168ba74e08cf513ed026c3092146f1a9890bc0f8a37350ef77",
+      "bytes": 1950
+    },
+    {
+      "path": "schemas/agent_readiness.schema.json",
+      "role": "schema",
+      "sha256": "d300d45949fb46fba3c1e467eefdc3b12be8135ff56c4fa19f4577240245493b",
+      "bytes": 1162
+    },
+    {
+      "path": "schemas/dev_spawn_readiness.schema.json",
+      "role": "schema",
+      "sha256": "2e74cfd869e4104fc2cf8536ff65a61a6707398b61f71e17f08408e7fc29b25e",
+      "bytes": 3019
+    },
+    {
+      "path": "scripts/factory-vps-activator.mjs",
+      "role": "vps_activator",
+      "sha256": "3086116af7659bafb41b431adab99c5e9db85069ec6abfc5e72718efe9e7a0e6",
+      "bytes": 29595
+    },
+    {
+      "path": "scripts/project-telegram-bot-runner.mjs",
+      "role": "project_telegram_runner",
+      "sha256": "a11a0dbb1bb11113d9454c15a262ca717367d1609f4ea899e8c1e3b38fcf5fdc",
+      "bytes": 17564
+    },
+    {
+      "path": "scripts/send-telegram-by-secret-ref.mjs",
+      "role": "telegram_send_helper",
+      "sha256": "0a9620c9cda31ca93b0c6506d23b042085b7009bf610abb0130a2d1d86b597a5",
+      "bytes": 1968
+    },
+    {
+      "path": "docs/factory-activation-test-checklist.md",
+      "role": "activation_test_checklist",
+      "sha256": "4525964391cf3285a12f825f5c916c30cd7b7699da8297e0871ef73d6b078d96",
+      "bytes": 9016
+    },
+    {
+      "path": "scripts/simulate-cmms-next-missions.mjs",
+      "role": "cmms_next_mission_regression",
+      "sha256": "195a9190e387cd216ad4d5c80eaac58ba02bbf4409da685ea6a06a99efd86e3a",
+      "bytes": 25359
+    }
+  ],
+  "external_pinned_dependencies": [
+    {
+      "path": "/opt/mitra-factory/mitra-agent-minimal/system_prompt.md",
+      "role": "mitra_base_system_prompt",
+      "sha256": "0c338599fa7f793fc7b313dd073e14b6b68384df0688b4487f03a4171caabc3a",
+      "bytes": 136488,
+      "portability_requirement": "Vendor this file into the canonical repo or install it from a pinned package/submodule with this hash before starting any actor."
+    },
+    {
+      "path": "/opt/mitra-factory/mitra-agent-minimal/AGENTS.md",
+      "role": "mitra_base_agents_md",
+      "sha256": "5edb9314ea407182d007c6e52baa7d06baea8b51909f422f0e6a062eff16ea4a",
+      "bytes": 1085,
+      "portability_requirement": "Vendor this file into the canonical repo or install it from a pinned package/submodule with this hash before starting Dev or QA."
+    },
+    {
+      "path": "/opt/mitra-factory/mitra-agent-minimal/CLAUDE.md",
+      "role": "mitra_base_claude_md",
+      "sha256": "2aa9284afbaf3919249893325835d35298787f905725d80ef5604c386b238ff3",
+      "bytes": 1569,
+      "portability_requirement": "Vendor this file into the canonical repo or install it from a pinned package/submodule with this hash when Claude-based agents are used."
+    },
+    {
+      "path": "/opt/mitra-factory/mitra-agent-minimal/.claude/commands/deploy.md",
+      "role": "mitra_base_claude_command",
+      "sha256": "9a3447d8186f3f3e1f150d318a11bedd3b53275788948f42db92b8e1e6e6b6b0",
+      "bytes": 2308,
+      "portability_requirement": "Vendor this command into the canonical repo or install it from a pinned package/submodule when Claude-based agents are used."
+    },
+    {
+      "path": "/opt/mitra-factory/mitra-agent-minimal/.claude/commands/mitra.md",
+      "role": "mitra_base_claude_command",
+      "sha256": "bd6af97fd20ef998d477ac286e7f7941b6e7001356f28582e1665fa64163264d",
+      "bytes": 852,
+      "portability_requirement": "Vendor this command into the canonical repo or install it from a pinned package/submodule when Claude-based agents are used."
+    }
+  ]
+}

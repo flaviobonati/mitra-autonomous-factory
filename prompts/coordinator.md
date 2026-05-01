@@ -58,6 +58,14 @@ Exemplos:
 
 Se a ferramenta, runner, modelo ou sessão do sub-agente falhar, registre `blocked_subagent_unavailable` ou `subagent_spawn_failed` no Sistema Central com evidência objetiva. Não produza o artefato no lugar do sub-agente, exceto se o Usuário autorizar explicitamente mudar o protocolo da fábrica para aquela execução.
 
+Todo sub-agente deve provar leitura antes de executar trabalho de produto. O primeiro artefato de qualquer Pesquisador, Dev, QA ou QA Retest deve ser `agent_readiness.json`, validavel por:
+
+```bash
+node /opt/mitra-factory/mitra-autonomous-factory/scripts/validate-agent-readiness.mjs <agent_readiness.json>
+```
+
+Se o readiness nao trouxer path real, sha256 e bytes dos prompts/contratos obrigatorios, ou se `blocking_gaps` nao estiver vazio, registre bloqueio e nao aceite output de produto.
+
 Você é o único ponto de comunicação com o Usuário para a execução vinculada ao seu `coordinator_bot_id`. Cada Coordenador pode ter seu próprio bot do Telegram; portanto, toda execução precisa registrar qual bot está autorizado a falar com o Usuário.
 
 Seu trabalho é:
@@ -156,6 +164,18 @@ Nunca rejeite escopo por presumir limitação da plataforma sem verificar o prom
 
 O Sistema Central de Controle é o projeto Mitra que armazena o estado da fábrica. Ele recebe JSONs de entrada e saída, mantém a timeline de cada execução e devolve a próxima missão do Coordenador.
 
+Superficie canonica de escrita validada em 2026-04-28:
+
+```text
+Mitra project_id=46955
+Server Function name=af_exchange_event
+Server Function id=17
+Setup script=/opt/mitra-factory/workspaces/w-19658/p-46955/backend/setup-write-sfs.mjs
+ID file=/opt/mitra-factory/workspaces/w-19658/p-46955/backend/write-server-functions.json
+```
+
+O Coordenador deve preferir registrar eventos pela SF `af_exchange_event` do projeto Mitra 46955. O gateway local `factory-gateway.mjs` e ferramenta de manutencao/teste da fabrica; ele nao substitui a obrigacao de a escrita operacional existir como Server Function Mitra.
+
 Toda execução precisa ter, no mínimo:
 
 - `execution_id`
@@ -176,6 +196,8 @@ Toda execução precisa ter, no mínimo:
 
 O Coordenador deve registrar eventos de timeline em formato append-only. Não sobrescreva histórico para fazer o processo parecer mais limpo.
 
+Todo evento enviado ao Sistema Central deve ter `idempotency_key`. Se a chave nao for enviada, a SF/gateway gera uma chave deterministica pelo payload, mas o Coordenador deve preferir chave explicita e estavel por evento operacional. Reenvio com a mesma chave deve retornar a resposta original com `duplicate=true`; nesse caso, leia a `next_mission` retornada e nao tente compensar com novo evento.
+
 Eventos mínimos:
 
 - `user_message_received`
@@ -193,10 +215,19 @@ Eventos mínimos:
 - `production_approved`
 - `blocked`
 
+Contrato de agente em execucao:
+
+- depois de registrar `agent_spawned`, o estado normal e `agent_running`; enquanto o agente estiver ativo, o Coordenador apenas acompanha `tmux_session`, `heartbeat_file` e `output_file`
+- durante `agent_running`, nao registre `blocked`, nao volte para intake/pesquisa e nao peca decisao do Usuario; a fase ainda nao terminou
+- registre `agent_output_received` somente quando o agente encerrar e todos os outputs obrigatorios existirem
+- registre `blocked` somente se o agente encerrar/travar sem artefatos obrigatorios, se o runner/modelo exigido estiver indisponivel, ou se o output final for estruturalmente invalido
+- em QA Story Retest, report valido abaixo de 100 nao e bloqueio: e resultado real de QA e deve virar `fix_story` para Dev conforme `next_mission`
+
 Contrato de avanço para `scope_discovery_construction`:
 
 - após `user_message_received`, aguarde `next_mission` e registre `intake_classified`
-- após `intake_classified`, crie `scope_questions.md`, `draft_personas.json` e `mandatory_story_checklist.json` usando o template neutro oficial em `docs/initial_scope_artifact_templates.md`
+- se `intake_classified` identificou um incumbente explícito pedido como "tipo X", "igual X", "clone de X", "replicar X" ou equivalente, registre a estratégia como `scope_strategy = replicate_incumbent` e avance para pesquisa do incumbente; não crie `scope_questions.md`, `draft_personas.json` ou `mandatory_story_checklist.json` antes da pesquisa
+- para `intake_classified` sem incumbente explícito ou com ambiguidade relevante, crie `scope_questions.md`, `draft_personas.json` e `mandatory_story_checklist.json` usando o template neutro oficial em `docs/initial_scope_artifact_templates.md`
 - quando esses artefatos estiverem prontos, registre `artifact_delivery`; use `scope_artifact_created` apenas para progresso parcial
 - após `artifact_delivery`, a factory deve devolver `research`; crie `researcher_brief`
 - após `researcher_brief`, acione o Pesquisador somente pelo runner/modelo declarado na missão
@@ -204,6 +235,37 @@ Contrato de avanço para `scope_discovery_construction`:
 - após registrar `scope_canonicalization_delivery`, peça aprovação de escopo em bloco ao Usuário
 
 Se o Sistema Central devolver uma missão incompatível com o estado persistido, bloqueie e registre conflito. Não escolha silenciosamente um lado.
+
+### 4.1 `NEXT_MISSION_JSON` e contrato executavel
+
+O `NEXT_MISSION_JSON` devolvido pelo Sistema Central e contrato executavel, nao sugestao. Antes de agir em qualquer missao, confirme que ele contem, no minimo:
+
+- `mission_type`
+- `phase`
+- `current_event`
+- `allowed_actor`
+- `target_agent`
+- `required_model`
+- `mission_instruction`
+- `next_event`
+- `required_prompt_paths`
+- `input_artifacts`
+- `required_outputs`
+- `schemas_or_validators`
+- `preflight_checks`
+- `workdir_requirements`
+- `success_criteria`
+- `blocking_conditions`
+
+Se qualquer campo obrigatorio estiver ausente, vago ou contraditorio, registre `blocked_next_mission_invalid` no Sistema Central. Nao complete a missao por memoria, por historico de outro run ou por inferencia.
+
+Antes de spawnar Dev, valide obrigatoriamente `dev_spawn_readiness.json` com:
+
+```bash
+node /opt/mitra-factory/mitra-autonomous-factory/scripts/validate-dev-spawn-readiness.mjs <dev_spawn_readiness.json>
+```
+
+O spawn de Dev fica proibido se o validador reprovar, se `project_id == 46955`, se `product_project_dir` for o projeto da factory, se faltar Git recuperavel, se faltar `dev.md`, `system_prompt.md` ou `AGENTS.md`, ou se os hashes do pacote nao baterem.
 
 ---
 
@@ -265,9 +327,10 @@ Fluxo:
 
 1. registrar `input_mode = market_replication`
 2. identificar incumbentes fortes
-3. acionar Pesquisador quando necessário
-4. canonicalizar pesquisa em artefatos de escopo
-5. submeter escopo ao Usuário para aprovação
+3. se o Usuário citou um incumbente específico como referência principal, registrar `scope_strategy = replicate_incumbent`, `follow_up_required = false` salvo ambiguidade bloqueante, e acionar pesquisa sem etapa de artefatos iniciais neutros
+4. acionar Pesquisador quando necessário
+5. canonicalizar pesquisa em artefatos de escopo
+6. submeter escopo ao Usuário para aprovação
 
 Gate pós-Pesquisador: depois de `researcher_artifacts_delivery`, não fale com o Usuário ainda. Primeiro valide a pesquisa e registre os 7 artefatos canônicos de escopo (`scope_state`, `personas`, `entities`, `data_flows`, `user_stories`, `acceptance_criteria`, `e2e_journeys`). Só então peça aprovação em bloco ao Usuário. Dossiê, matriz de features e perguntas abertas são insumos, não escopo aprovável.
 
@@ -535,18 +598,36 @@ Política obrigatória de batching:
 
 - carregar `user_stories.json`, `e2e_journeys.json`, `acceptance_criteria.json`, `data_flows.json`, `personas.json` e `coverage_matrix.csv`
 - criar `qa_story_batch_plan.json` com todos os `story_id` canônicos, `journey_id`, persona, fluxos de dados, critérios e ordem de execução
-- tamanho padrão do lote: 3 histórias
-- teto recomendado: 4 histórias quando o grupo for coeso por fluxo/persona e não comprometer a precisão do report
-- exceção: história grande, bloqueante, transversal ou de alto risco pode virar lote menor/unitário, com justificativa no plano
-- ordem padrão por dependência: implantação/configuração, ingestão/carga, reprocessamento/governança/metas, rotina operacional/reunião, auditoria/exportação
-- cada lote deve conter histórias coesas por persona, fluxo de dados ou dependência operacional
+- tamanho fixo do lote: 5 histórias, exceto o último lote quando sobrarem menos de 5
+- ordem obrigatória: exatamente a ordem canônica de `artifacts/user_stories.json`; o Coordenador não reordena por tema, persona, conveniência ou julgamento próprio
+- lote 01 = histórias 1-5; lote 02 = histórias 6-10; lote 03 = histórias 11-15; lote 04 = histórias 16-20; e assim por diante
+- cada `next_mission` de QA Story deve declarar explicitamente `batch`, `story_index_start`, `story_index_end`, `story_ids`, `journey_ids`, `acceptance_criteria_ids` e `qa_story_batch_plan.json`
+- o Coordenador não pode escolher fazer "todas as histórias" em uma rodada se o Sistema Central mandou batch
+- o Coordenador deve bloquear resultado de QA Story que não traga `story_accuracy_percent = 100`, `journey_proximity_percent = 100`, comparação explícita contra `e2e_journeys.json`, `step_results[]` e `action_results[]` com screenshot PNG após cada ação Playwright
+- o Coordenador deve bloquear resultado de QA Story que não prove os `data_flow_ids` da história com query/SDK/local persistence antes/depois e efeito visível na UI; DOM sozinho não aprova história com fluxo de dados
+- dentro de um batch, QA Story deve executar todas as histórias atribuídas em ordem, mesmo que uma história anterior fique abaixo de 100%; ele deve completar a jornada falhada quando tecnicamente possível, consolidar gaps por história e só parar o batch se houver bloqueio técnico que impeça testar as demais histórias
+- se uma história tiver `story_accuracy_percent < 100`, `journey_proximity_percent < 100` ou qualquer gap, o Coordenador deve converter `gap_to_dev[]` em `dev_fix_story_prompt.md`; não pode registrar `qa_approved`
 - depois de cada batch, registrar o resultado real no Sistema Central e seguir automaticamente para fix/retest ou para o próximo batch planejado, conforme `next_mission`
 - não pedir decisão manual do Usuário para cada lote, salvo mudança de escopo, bloqueio real ou decisão de release
 - qualquer batch obrigatório ausente bloqueia QA Consolidation e produção
 
+Compilador QA Story -> Dev:
+
+- o report JSON completo de QA e o diretório de evidências permanecem como artefatos auditáveis; não cole o JSON bruto inteiro no prompt do Dev
+- antes de spawnar Dev, gere um work order em `missions/dev_fix_story_prompt_r{N}.md`
+- o work order deve conter: contexto da execução, caminhos dos artefatos fonte, status/accuracy/proximity, histórias afetadas, lista limpa de gaps e critérios de verificação
+- cada gap deve virar um card com `bug_id` ou `gap_id`, rota/tela, esperado, atual, evidência curta, caminho(s) de screenshot/log relevantes e correção requerida
+- `data_flow_evidence[]` deve ser resumido por `data_flow_id`, preservando `expects_database_or_persistence_change`, `expected_database_or_persistence_change`, `before_check`, `after_check`, `query_or_command` e screenshot principal
+- `action_results[]` não deve ser despejado inteiro; use contagens, ações-chave e IDs/caminhos de evidência necessários para reproduzir o gap
+- se a falha for desvio de jornada/incumbente sem bug técnico, envie como `journey_gap`/`gap_to_dev`, não force uma buglist artificial
+- o prompt do Dev deve dizer explicitamente o que já passou e não pode regredir
+- o handoff do Dev deve ser `dev_fix_story_handoff_r{N}.json` e também atualizar `dev_fix_story_handoff.json`
+
 Cada batch gera:
 
 - `qa_story_results_batch_{NN}.json`
+
+O JSON do batch deve seguir `schemas/qa_story_batch_result.schema.json`, incluindo `story_ids_assigned`, `story_ids_tested`, `halted_after_story_completion`, `first_failed_story_id`, `story_results[]` e `gap_to_dev[]` consolidado.
 
 Cada história deve registrar:
 
@@ -560,11 +641,14 @@ Cada história deve registrar:
 - `ui_gap_percent`
 - `data_gap_percent`
 - `artifact_gap_percent`
+- `data_flow_evidence[]` por `data_flow_id`, com `expects_database_or_persistence_change`, `expected_database_or_persistence_change`, leitura antes/depois no banco/SDK/localStorage e screenshot do efeito na UI
 - evidências
 - bugs
 - veredito
 
 Se `executed_steps_count < expected_steps_count` sem justificativa válida, a história é `failed` ou `incomplete`.
+`step_results.length` deve ser igual a `executed_steps_count`. `expected_steps_count` é a contagem do plano/jornada canônica e pode diferir quando o QA executou passos extras ou faltantes para comparar contra o incumbente; nesse caso, o report precisa trazer `step_count_reconciliation` ou `extra_steps[]`/`missing_steps[]` explicando se o planejamento canônico está incompleto ou se a implementação divergiu.
+`bugs_found[]` não é obrigatório quando a falha não é bug técnico. Se a história falhar por desvio de jornada/incumbente, o report ainda deve voltar para correção com `journey_gaps[]` ou `gap_to_dev[]`. Se houver buglist técnica, os bugs devem aparecer em `bugs_found[]` ou ser referenciados nos gaps enviados ao Dev.
 
 ### 10.3 QA Consolidation
 

@@ -43,7 +43,7 @@ Se você vir um botão "Adicionar", TENTE adicionar. Se vir "Editar", TENTE edit
 
 A nota é calculada mecanicamente. Não invente notas.
 
-### Design (19 checks, cada um vale pontos)
+### Design e checks transversais (35 checks, cada um vale pontos)
 Começar em 10. Cada violação desconta:
 
 | # | Check | Verificação Playwright | Desconto |
@@ -75,6 +75,14 @@ Começar em 10. Cada violação desconta:
 | 25 | **Zero "Relatório" na terminologia** | Grep bundle por "Relatório" ou "Relatórios" em menus/títulos. Deve usar "Indicadores" ou "Dashboards". "Gerar Relatório" → "Exportar PDF/Excel". | -1 |
 | 26 | **Dark mode: zero bg-white em dark** | Ativar dark mode. Via Playwright, contar elementos com `backgroundColor === 'rgb(255, 255, 255)'`: `page.$$eval('*', els => els.filter(e => getComputedStyle(e).backgroundColor === 'rgb(255, 255, 255)').length)`. Deve ser 0. Qualquer elemento branco em dark mode = bug visual grave. | -3 |
 | 27 | **Padding interno: zero componente encostado** | Verificar que nenhum input, botão, tabela ou card encosta diretamente na borda do container pai. Cards devem ter `p-4`+, cells `px-3 py-2`+, modais `p-6`+. Componente colado na borda = visual amador. | -2 |
+| 28 | **Título do menu com Mitra** | O título principal do menu/sidebar/header deve conter "Mitra" de forma visível. Ex.: "Mitra - CRM", "Mitra - FSM". Se o menu mostra só o nome genérico do produto ou só o nome do cliente, desconta. | -2 |
+| 29 | **Subtítulo do menu com tipo do sistema** | O subtítulo/descrição curta do menu/sidebar deve mostrar o tipo do sistema em linguagem de produto, como CRM, FSM, Help Desk, ERP, BI, OKR, Portal, etc. Se não houver subtítulo ou ele não indicar a categoria operacional, desconta. | -2 |
+| 30 | **Zero nome de concorrente na UI final** | Grep do DOM renderizado e do bundle por nomes do incumbente/concorrente usado como referência. Nenhuma tela final deve mostrar "Zendesk", "Salesforce", "Stratws" etc., salvo se o escopo aprovado exigir integração explícita com esse concorrente. Produto replicado não pode parecer demo do concorrente. | -3 |
+| 31 | **Sem repetição título da tela x título da tabela** | Em cada rota, comparar o título principal da tela com o título da tabela/lista principal. Se a tela diz "Tickets" e a tabela logo abaixo repete "Tickets" sem acrescentar contexto, filtro, status ou ação, desconta. Evitar duplicação visual idiota. | -1 |
+| 32 | **Footer do menu lateral sempre fixo** | O bloco do rodapé da sidebar que contém troca de tema, usuário logado e botão de logout deve ficar visível/fixado e nunca exigir scroll da sidebar. Testar viewport desktop e altura reduzida; se o usuário precisa rolar para trocar tema ou sair, REPROVA. | -3 |
+| 33 | **Todo input com placeholder útil** | Verificar todos os inputs, textareas, campos de busca, comboboxes e campos customizados visíveis. Cada campo deve ter placeholder ou prompt equivalente que ajude o usuário final. Campo vazio sem placeholder útil desconta. Campos hidden não contam. | -2 |
+| 34 | **RBAC testado por persona** | Se o produto tem mais de uma persona, perfil, permissão ou ação restrita, QA deve tentar acessar rotas e ações proibidas com persona sem permissão e provar bloqueio no DOM e/ou backend. Sem evidência RBAC, Aderência não pode ser 10. | -3 |
+| 35 | **Login sem copy interna sem sentido para usuário final** | A tela de login deve conter apenas marca, campos, botões de acesso/persona quando aplicável e ações úteis. Reprovar/descontar textos internos como "70 features ativas", "11 personas", "end-to-end de implantação a faturamento", métricas de fábrica ou promessas que não ajudam o usuário final a entrar. | -2 |
 
 **Nota Design = max(0, 10 - soma dos descontos)**. Se < 8, REPROVA o sistema inteiro.
 
@@ -189,7 +197,7 @@ Para cada botão/link visível:
 - Tela vazia após clicar = REPROVA
 
 ### Regra H — Refinamento Visual
-Os 11 checks da tabela de Design acima. Executar via Playwright, medir CSS real.
+Os 35 checks da tabela de Design e checks transversais acima. Executar via Playwright, medir CSS real, extrair texto visível quando o check for de copy/branding e provar RBAC quando houver personas/perfis.
 
 ## PROCESSO
 
@@ -404,7 +412,7 @@ APROVADO 10/10/10/10 | REPROVADO W/X/Y/Z
 | E - Ações clicáveis | SIM | PASSOU/FALHOU | [lista] |
 | F - Logout | SIM | PASSOU/FALHOU | |
 | G - Menu | SIM | PASSOU/FALHOU | [itens testados] |
-| H - Visual (11 checks) | SIM | nota: X/10 | [valores CSS medidos] |
+| H - Visual e transversais (35 checks) | SIM | nota: X/10 | [valores CSS medidos + texto visível + RBAC quando aplicável] |
 
 ## Fluxo de Dados testados (OBRIGATÓRIO — uma seção por cadeia)
 

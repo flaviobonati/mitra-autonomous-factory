@@ -91,6 +91,12 @@ You do not choose your own batch size.
 The system must state the exact assigned batch.
 If it does not, the task package is incomplete.
 
+Execute every assigned story inside the batch in the canonical order provided by the system, even when an earlier story fails. If the current story cannot reach `story_accuracy_percent = 100` and `journey_proximity_percent = 100`, do not stop at the first failed assertion. Continue that same story until the full approved journey has been exercised when technically possible, collecting all UI/data/artifact gaps for that story. Then move to the next assigned story and repeat the same process.
+
+Do not stop the batch for a functional, journey, UI, data, artifact, RBAC, responsiveness or copy failure in one story. Stop before remaining assigned stories only when a technical blocker prevents reliable execution of those remaining stories, such as deployed app unavailable, login unavailable for all relevant personas, corrupted test environment, missing assigned story definitions, or required tooling failure.
+
+Only stop the current story early when the failure makes later steps of that same story technically impossible without inventing state, bypassing the product, or hiding the gap. If you use a controlled workaround to inspect downstream behavior, mark it explicitly as a workaround and keep the story failed. After recording that story's gaps, continue with the next assigned story when technically possible.
+
 A story test is complete only when:
 1. every expected step was executed in order with Playwright unless the step is explicitly non-UI
 2. every click/fill/select/upload/drag/submit was followed by DOM verification
@@ -116,6 +122,18 @@ For each story:
 
 Do not compress multiple expected clicks into one vague statement. If the story has 12 expected actions, the result must show 12 executed or explicitly skipped actions.
 
+Screenshot discipline is per action, not per story. Every Playwright `click`, `fill`, `select`, `upload`, `drag`, `submit` or equivalent user action must produce an `action_results[]` record with:
+
+- action index inside the canonical step
+- action type and selector/visible target
+- expected DOM/state change
+- actual DOM/state change
+- `dom_verified = true`
+- `screenshot_after_action_path` pointing to a valid PNG captured after the verification
+- pass/fail status
+
+One final screenshot for a whole story is not enough. A screenshot before the action is not enough. A screenshot after a different action is not enough.
+
 ## Database Verification Protocol
 
 For every step that creates, edits, deletes, imports, approves, calculates, changes status, generates a record, attaches a file, sends a message or triggers a workflow, QA must verify the expected database effect.
@@ -139,6 +157,34 @@ Examples:
 
 If the UI appears correct but the database state did not change as expected, the step fails. If the story does not define the expected database effect for a state-changing action, mark the story as `blocked` or `incomplete` with `stop_reason = "missing_expected_db_effect: ..."`.
 
+## Data Flow Closure Protocol
+
+For every `data_flow_id` attached to the story in `qa_story_batch_plan.json`, QA must prove the data flow behind the journey, not only the visible screen.
+
+For each relevant step, record:
+
+- source data or input entered by the persona
+- entity/table/local store/server function affected
+- before-state query or SDK/local persistence read
+- UI action that should mutate or consume the data
+- after-state query or SDK/local persistence read
+- downstream UI where the same data becomes visible, recalculated, filtered, audited, notified, exported or blocked
+- evidence path for the query/check and screenshot after the UI effect
+
+If the product uses real database tables or Server Functions, use SDK/database checks. If the current product is a frontend/localStorage implementation, inspect the exact localStorage keys and persisted entities as the data store for this run, and state that limitation explicitly. A story cannot pass on DOM evidence alone when it has `data_flow_ids`.
+
+The report must include `data_flow_evidence[]` entries mapped to `data_flow_id`, with query/check command, before/after result and the UI evidence that proves the persisted data is actually reflected in the interface.
+
+Each `data_flow_evidence[]` entry must include:
+
+- `expects_database_or_persistence_change`: boolean
+- `expected_database_or_persistence_change`: the exact expected database, Server Function, localStorage, artifact or external state change/invariant
+- `before_check`: the concrete query, SDK read, localStorage read or artifact check before the UI action
+- `after_check`: the concrete query, SDK read, localStorage read or artifact check after the UI action
+- `ui_effect_evidence_id`: the screenshot/evidence proving the stored data produced the visible UI effect
+
+If no persistence change is expected, set `expects_database_or_persistence_change = false`, fill `expected_database_or_persistence_change` with the expected invariant and reason, and still provide before/after checks proving the invariant. Do not leave the field blank.
+
 If execution stops early:
 
 - set `stopped_early = true`
@@ -161,6 +207,8 @@ UI presence never counts as story completion by itself.
 
 `story_accuracy_percent` measures how close execution stayed to the expected story.
 
+`journey_proximity_percent` measures how close the executed journey stayed to the approved `e2e_journeys.json` journey for the story.
+
 `gap` values measure how far reality stayed from expectation.
 
 Minimum gap dimensions:
@@ -170,6 +218,27 @@ Minimum gap dimensions:
 - `artifact_gap_percent`
 
 You must justify these values through evidence and explicit expected-versus-actual comparison.
+
+For a story to pass, both values must be exactly `100`:
+
+- `story_accuracy_percent = 100`
+- `journey_proximity_percent = 100`
+
+If the executed route, action sequence, UI result, data mutation, artifact, exception handling or persona differs from the approved journey, record the delta in `journey_proximity_evidence` and reduce the proximity value. Route substitutions are only allowed when the scope already approved the equivalence or the report marks the story as failed/incomplete; the QA agent may not silently treat a different route as 100% proximity.
+
+When either `story_accuracy_percent` or `journey_proximity_percent` is below 100, the story must not pass. Create `gap_to_dev[]` entries that are directly actionable by the Dev:
+
+- `gap_id`
+- `story_id`
+- `journey_id`
+- severity
+- expected behavior from `e2e_journeys.json`
+- actual behavior observed
+- concrete Dev task
+- acceptance condition for retest
+- evidence IDs/screenshots proving the gap
+
+After the whole assigned batch is complete, the coordinator will send the consolidated gaps to Dev before testing later batches.
 
 If the factory later defines a stricter numeric rubric for accuracy and gap, you must use that rubric instead of improvising.
 
@@ -189,7 +258,20 @@ In these stories, "screen opened" is never enough.
 
 - `qa_story_results_batch_{NN}.json`
 
-The JSON must include `story_id`, persona, expected steps, executed steps, per-step expected/actual records, screenshots/evidence, database/artifact checks when relevant, `story_accuracy_percent`, gap percentages, blockers, and explicit verdict for every assigned story.
+The batch JSON must follow `schemas/qa_story_batch_result.schema.json` and include the complete list of assigned stories, tested stories, whether a technical blocker halted the batch, the first failed story when applicable, all per-story results, and consolidated `gap_to_dev[]`.
+
+The JSON must include `story_id`, `journey_id`, persona, expected steps, executed steps, `actual_journey_description`, per-step expected/actual records, per-action screenshots/evidence, database/artifact checks when relevant, `story_accuracy_percent`, `journey_proximity_percent`, `journey_proximity_evidence`, gap percentages, `gap_to_dev`, blockers, and explicit verdict for every assigned story.
+
+Structural invariants are mandatory:
+
+- `executed_steps_count` must equal `step_results.length`.
+- `expected_steps_count` is the approved/canonical plan count; it may differ from executed count only when the QA explicitly explains why the plan was incomplete or why extra/missing steps were needed to compare against the incumbent.
+- When `expected_steps_count != executed_steps_count`, include `step_count_reconciliation` or `extra_steps[]`/`missing_steps[]` stating whether the canonical journey/planning needs correction or the implementation diverged.
+- A technical bug list is not mandatory when the failure is journey/incumbent mismatch instead of a code defect.
+- If the story is below 100% accuracy/proximity, the report must include at least one concrete return path: `bugs_found[]`, `journey_gaps[]`, or `gap_to_dev[]`.
+- `action_results[]` must include every material Playwright action, with screenshot and DOM/data verification.
+
+Do not output the report if these invariants are not true; fix the report generator and rerun the test first.
 
 ## Per-Story Rule
 
@@ -200,8 +282,13 @@ Each story result must include:
 - why it stopped early
 - per-step expected action
 - per-step actual action
+- per-action Playwright action result with screenshot after each action
 - per-step UI evidence
 - per-step data/artifact evidence when applicable
+- `data_flow_evidence[]` mapped to every story `data_flow_id`, including `expected_database_or_persistence_change`, before/after query or local persistence checks and downstream UI effect
+- `journey_proximity_percent`
+- expected versus actual journey comparison against `e2e_journeys.json`
+- `gap_to_dev[]` when proximity or accuracy is below 100
 - expected versus actual summary
 - verdict
 

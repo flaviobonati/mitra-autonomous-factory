@@ -2,6 +2,12 @@
   "schema_version": "factory.v2",
   "factory_instance_code": "invalid_workspace_example",
   "root_dir": "/opt/mitra-factory",
+  "canonical_repo": {
+    "url": "https://github.com/flaviobonati/mitra-autonomous-factory.git",
+    "ref": "main",
+    "local_dir": "/opt/mitra-factory/mitra-autonomous-factory",
+    "prompt_manifest_path": "/opt/mitra-factory/mitra-autonomous-factory/prompt-manifest.json"
+  },
   "mitra": {
     "base_url": "https://newmitra.mitrasheet.com:8080",
     "integrations_url": "https://newmitra.mitrasheet.com:8080",
@@ -27,6 +33,15 @@
     "template_dir": "/opt/mitra-factory/template",
     "mitra_agent_dir": "/opt/mitra-factory/mitra-agent-minimal"
   },
+  "meta_agent": {
+    "bot_username": "@your_meta_agent_bot",
+    "bot_token_secret_ref": "TELEGRAM_META_AGENT_BOT_TOKEN",
+    "dir_root": "/opt/mitra-factory/meta-agents",
+    "model": "gpt-5.5",
+    "session_runtime": "tmux",
+    "prompt_path": "/opt/mitra-factory/mitra-autonomous-factory/prompts/meta-agent.md",
+    "heartbeat_path": "/opt/mitra-factory/meta-agents/current/heartbeat.json"
+  },
   "coordinator_defaults": {
     "dir_root": "/opt/mitra-factory/coordinators",
     "model": "gpt-5.5",
@@ -41,8 +56,8 @@
     "webhook_url": ""
   },
   "ui_project_creation": {
-    "allowed_fields": ["project_name", "telegram_bot_ref"],
-    "forbidden_fields": ["domain", "workspace_id", "factory_project_id", "coordinator_model", "initial_request_type", "initial_intent_message", "vps_config"],
+    "allowed_fields": ["project_name", "project_bot_username", "project_bot_token_secret_ref"],
+    "forbidden_fields": ["domain", "workspace_id", "factory_project_id", "coordinator_model", "initial_request_type", "initial_intent_message", "vps_config", "raw_bot_token"],
     "creates_product_project_in_configured_workspace": true,
     "initial_message_required": false
   },

@@ -9,15 +9,19 @@
     "batch_id",
     "batch_range",
     "story_id",
+    "journey_id",
     "story_title",
     "persona_id",
     "persona_name",
     "story_type",
     "priority",
     "expected_story_summary",
+    "actual_journey_description",
     "preconditions",
     "test_status",
     "story_accuracy_percent",
+    "journey_proximity_percent",
+    "journey_proximity_evidence",
     "story_gap_percent",
     "ui_gap_percent",
     "data_gap_percent",
@@ -30,7 +34,7 @@
     "ui_evidence",
     "data_flow_evidence",
     "artifact_evidence",
-    "bugs_found",
+    "gap_to_dev",
     "expected_vs_actual_summary",
     "verdict"
   ],
@@ -48,6 +52,7 @@
       }
     },
     "story_id": { "type": "string", "minLength": 1 },
+    "journey_id": { "type": "string", "minLength": 1 },
     "story_title": { "type": "string" },
     "persona_id": { "type": "string", "minLength": 1 },
     "persona_name": { "type": "string" },
@@ -60,6 +65,7 @@
       "enum": ["critical", "high", "medium", "low"]
     },
     "expected_story_summary": { "type": "string" },
+    "actual_journey_description": { "type": "string", "minLength": 20 },
     "preconditions": {
       "type": "array",
       "items": { "type": "string" }
@@ -69,6 +75,52 @@
       "enum": ["not_started", "in_progress", "passed", "failed", "blocked", "incomplete"]
     },
     "story_accuracy_percent": { "type": "number", "minimum": 0, "maximum": 100 },
+    "journey_proximity_percent": { "type": "number", "minimum": 0, "maximum": 100 },
+    "journey_proximity_evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "approved_journey_source",
+        "expected_journey_steps_count",
+        "matched_journey_steps_count",
+        "route_deltas",
+        "action_deltas",
+        "data_deltas",
+        "artifact_deltas",
+        "summary"
+      ],
+      "properties": {
+        "approved_journey_source": { "type": "string", "minLength": 1 },
+        "expected_journey_steps_count": { "type": "integer", "minimum": 0 },
+        "matched_journey_steps_count": { "type": "integer", "minimum": 0 },
+        "route_deltas": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "action_deltas": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "data_deltas": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "artifact_deltas": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "step_count_reconciliation": { "type": "string" },
+        "extra_steps": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "missing_steps": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "summary": { "type": "string", "minLength": 20 }
+      }
+    },
     "story_gap_percent": { "type": "number", "minimum": 0, "maximum": 100 },
     "ui_gap_percent": { "type": "number", "minimum": 0, "maximum": 100 },
     "data_gap_percent": { "type": "number", "minimum": 0, "maximum": 100 },
@@ -87,15 +139,42 @@
     },
     "data_flow_evidence": {
       "type": "array",
-      "items": { "$ref": "#/$defs/evidence" }
+      "items": { "$ref": "#/$defs/data_flow_check" }
     },
     "artifact_evidence": {
       "type": "array",
       "items": { "$ref": "#/$defs/evidence" }
     },
+    "gap_to_dev": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/dev_gap" }
+    },
     "bugs_found": {
       "type": "array",
       "items": { "$ref": "#/$defs/bug" }
+    },
+    "journey_gaps": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/journey_gap" }
+    },
+    "step_count_reconciliation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["expected_steps_count", "executed_steps_count", "summary", "canonical_plan_needs_update"],
+      "properties": {
+        "expected_steps_count": { "type": "integer", "minimum": 0 },
+        "executed_steps_count": { "type": "integer", "minimum": 0 },
+        "summary": { "type": "string", "minLength": 20 },
+        "canonical_plan_needs_update": { "type": "boolean" }
+      }
+    },
+    "extra_steps": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/step_delta" }
+    },
+    "missing_steps": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/step_delta" }
     },
     "expected_vs_actual_summary": { "type": "string" },
     "verdict": {
@@ -114,6 +193,7 @@
         "ui_expected",
         "ui_actual",
         "db_check_required",
+        "action_results",
         "status"
       ],
       "properties": {
@@ -136,9 +216,114 @@
           "type": "array",
           "items": { "type": "string" }
         },
+        "action_results": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/action_result" }
+        },
         "status": {
           "type": "string",
           "enum": ["passed", "failed", "blocked", "skipped"]
+        }
+      }
+    },
+    "action_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "action_index",
+        "action_type",
+        "target",
+        "expected_dom_or_state_change",
+        "actual_dom_or_state_change",
+        "dom_verified",
+        "screenshot_after_action_path",
+        "status"
+      ],
+      "properties": {
+        "action_index": { "type": "integer", "minimum": 1 },
+        "action_type": {
+          "type": "string",
+          "enum": ["click", "fill", "select", "upload", "drag", "submit", "navigate", "wait", "assert"]
+        },
+        "target": { "type": "string", "minLength": 1 },
+        "expected_dom_or_state_change": { "type": "string", "minLength": 1 },
+        "actual_dom_or_state_change": { "type": "string", "minLength": 1 },
+        "dom_verified": { "type": "boolean", "const": true },
+        "screenshot_after_action_path": { "type": "string", "pattern": "\\.png$" },
+        "status": {
+          "type": "string",
+          "enum": ["passed", "failed", "blocked", "skipped"]
+        }
+      }
+    },
+    "data_flow_check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "data_flow_id",
+        "storage_kind",
+        "expects_database_or_persistence_change",
+        "expected_database_or_persistence_change",
+        "before_check",
+        "after_check",
+        "ui_effect_evidence_id",
+        "status",
+        "summary"
+      ],
+      "properties": {
+        "data_flow_id": { "type": "string", "minLength": 1 },
+        "storage_kind": {
+          "type": "string",
+          "enum": ["database", "server_function", "local_storage", "artifact", "external_api", "not_applicable"]
+        },
+        "expects_database_or_persistence_change": { "type": "boolean" },
+        "expected_database_or_persistence_change": {
+          "type": "string",
+          "minLength": 1,
+          "description": "What exact database/server/local persistence change or invariant is expected for this data flow. Use NA with reason only when storage_kind is not_applicable."
+        },
+        "before_check": { "type": "string", "minLength": 1 },
+        "after_check": { "type": "string", "minLength": 1 },
+        "query_or_command": { "type": "string" },
+        "ui_effect_evidence_id": { "type": "string", "minLength": 1 },
+        "screenshot_path": { "type": "string" },
+        "status": {
+          "type": "string",
+          "enum": ["passed", "failed", "blocked", "not_applicable"]
+        },
+        "summary": { "type": "string", "minLength": 20 }
+      }
+    },
+    "dev_gap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "gap_id",
+        "story_id",
+        "journey_id",
+        "severity",
+        "expected",
+        "actual",
+        "dev_task",
+        "acceptance_to_retest",
+        "evidence_ids"
+      ],
+      "properties": {
+        "gap_id": { "type": "string", "minLength": 1 },
+        "story_id": { "type": "string", "minLength": 1 },
+        "journey_id": { "type": "string", "minLength": 1 },
+        "severity": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "critical"]
+        },
+        "expected": { "type": "string", "minLength": 1 },
+        "actual": { "type": "string", "minLength": 1 },
+        "dev_task": { "type": "string", "minLength": 20 },
+        "acceptance_to_retest": { "type": "string", "minLength": 20 },
+        "evidence_ids": {
+          "type": "array",
+          "items": { "type": "string" }
         }
       }
     },
@@ -156,6 +341,30 @@
         "query": { "type": "string" },
         "result": { "type": "string" },
         "summary": { "type": "string" }
+      }
+    },
+    "journey_gap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["gap_id", "story_id", "expected", "actual", "evidence", "return_to_dev_reason"],
+      "properties": {
+        "gap_id": { "type": "string", "minLength": 1 },
+        "story_id": { "type": "string", "minLength": 1 },
+        "route": { "type": "string" },
+        "expected": { "type": "string", "minLength": 1 },
+        "actual": { "type": "string", "minLength": 1 },
+        "evidence": { "type": "string", "minLength": 1 },
+        "return_to_dev_reason": { "type": "string", "minLength": 20 }
+      }
+    },
+    "step_delta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["step_index", "description", "reason"],
+      "properties": {
+        "step_index": { "type": "integer", "minimum": 1 },
+        "description": { "type": "string", "minLength": 1 },
+        "reason": { "type": "string", "minLength": 20 }
       }
     },
     "bug": {

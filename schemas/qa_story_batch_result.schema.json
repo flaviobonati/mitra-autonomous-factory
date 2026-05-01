@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "QAStoryBatchResult",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "execution_id",
+    "mission_id",
+    "batch_id",
+    "batch_size",
+    "story_index_start",
+    "story_index_end",
+    "story_ids_assigned",
+    "story_ids_tested",
+    "halted_after_story_completion",
+    "halt_reason",
+    "first_failed_story_id",
+    "all_tested_stories_approved",
+    "story_results",
+    "gap_to_dev"
+  ],
+  "properties": {
+    "execution_id": { "type": "string", "minLength": 1 },
+    "mission_id": { "type": "string", "minLength": 1 },
+    "batch_id": { "type": "string", "minLength": 1 },
+    "batch_size": { "type": "integer", "minimum": 1 },
+    "story_index_start": { "type": "integer", "minimum": 1 },
+    "story_index_end": { "type": "integer", "minimum": 1 },
+    "story_ids_assigned": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "story_ids_tested": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "halted_after_story_completion": {
+      "type": "boolean",
+      "description": "True only when a technical blocker prevented execution of remaining assigned stories after the current story was completed or blocked with evidence. Functional failure in one story must not halt the batch."
+    },
+    "completed_failed_story_before_halt": {
+      "type": "boolean",
+      "description": "If halted_after_story_completion is true, states whether the last attempted failed story was completed as far as technically possible before the batch halt."
+    },
+    "halted_on_first_gap": {
+      "type": "boolean",
+      "deprecated": true,
+      "description": "Deprecated. QA must not halt on the first functional gap. Use halted_after_story_completion only for technical blockers that prevent remaining assigned stories."
+    },
+    "halt_reason": { "type": "string" },
+    "first_failed_story_id": { "type": "string" },
+    "all_tested_stories_approved": { "type": "boolean" },
+    "story_results": {
+      "type": "array",
+      "items": { "$ref": "qa_story_result.schema.json" }
+    },
+    "gap_to_dev": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["gap_id", "story_id", "journey_id", "dev_task"],
+        "properties": {
+          "gap_id": { "type": "string", "minLength": 1 },
+          "story_id": { "type": "string", "minLength": 1 },
+          "journey_id": { "type": "string", "minLength": 1 },
+          "dev_task": { "type": "string", "minLength": 20 }
+        }
+      }
+    }
+  }
+}

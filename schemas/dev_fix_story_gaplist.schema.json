@@ -1,0 +1,163 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DevFixStoryGaplist",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "generated_by",
+    "generated_at",
+    "coordinator_code",
+    "execution_code",
+    "source_report_path",
+    "qa_result",
+    "story_summaries",
+    "gap_cards",
+    "data_flow_cards",
+    "generated_files",
+    "required_outputs"
+  ],
+  "properties": {
+    "generated_by": { "type": "string", "const": "factory-gateway.mjs" },
+    "generated_at": { "type": "string", "minLength": 1 },
+    "coordinator_code": { "type": "string", "minLength": 1 },
+    "execution_code": { "type": "string", "minLength": 1 },
+    "workdir": { "type": "string", "minLength": 1 },
+    "coordinator_dir": { "type": "string", "minLength": 1 },
+    "production_url": { "type": "string", "minLength": 1 },
+    "source_report_path": { "type": "string", "minLength": 1 },
+    "source_buglist_path": { "type": "string" },
+    "source_evidence_dir": { "type": "string" },
+    "qa_result": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["status", "approved", "story_ids"],
+      "properties": {
+        "status": { "type": "string" },
+        "approved": { "type": "boolean" },
+        "story_accuracy_percent": { "type": ["number", "null"] },
+        "journey_proximity_percent": { "type": ["number", "null"] },
+        "story_ids": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "story_summaries": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/story_summary" }
+    },
+    "gap_cards": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/gap_card" }
+    },
+    "data_flow_cards": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/data_flow_card" }
+    },
+    "key_action_cards": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/action_card" }
+    },
+    "generated_files": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dev_gaplist_json", "dev_gaplist_md", "dev_prompt"],
+      "properties": {
+        "dev_gaplist_json": { "type": "string", "minLength": 1 },
+        "dev_gaplist_md": { "type": "string", "minLength": 1 },
+        "dev_prompt": { "type": "string", "minLength": 1 }
+      }
+    },
+    "required_outputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dev_handoff_rn", "dev_handoff_latest"],
+      "properties": {
+        "dev_handoff_rn": { "type": "string", "minLength": 1 },
+        "dev_handoff_latest": { "type": "string", "minLength": 1 }
+      }
+    }
+  },
+  "$defs": {
+    "story_summary": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["story_id", "status", "story_accuracy_percent", "journey_proximity_percent"],
+      "properties": {
+        "story_id": { "type": "string", "minLength": 1 },
+        "journey_id": { "type": "string" },
+        "status": { "type": "string" },
+        "story_accuracy_percent": { "type": ["number", "null"] },
+        "journey_proximity_percent": { "type": ["number", "null"] },
+        "expected_steps_count": { "type": ["integer", "null"] },
+        "executed_steps_count": { "type": ["integer", "null"] },
+        "step_results_count": { "type": "integer", "minimum": 0 },
+        "has_step_count_reconciliation": { "type": "boolean" }
+      }
+    },
+    "gap_card": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["id", "story_id", "type", "expected", "actual", "evidence", "suggested_fix"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "story_id": { "type": "string", "minLength": 1 },
+        "journey_id": { "type": "string" },
+        "type": { "type": "string", "enum": ["technical_bug_or_gap", "journey_gap"] },
+        "severity": { "type": "string" },
+        "route": { "type": "string" },
+        "expected": { "type": "string" },
+        "actual": { "type": "string" },
+        "evidence": { "type": "string" },
+        "suggested_fix": { "type": "string" }
+      }
+    },
+    "data_flow_card": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "story_id",
+        "data_flow_id",
+        "status",
+        "expects_database_or_persistence_change",
+        "expected_database_or_persistence_change",
+        "before_check",
+        "after_check"
+      ],
+      "properties": {
+        "story_id": { "type": "string", "minLength": 1 },
+        "data_flow_id": { "type": "string", "minLength": 1 },
+        "storage_kind": { "type": "string" },
+        "status": { "type": "string" },
+        "expects_database_or_persistence_change": { "type": "boolean" },
+        "expected_database_or_persistence_change": { "type": "string" },
+        "before_check": { "type": "string" },
+        "after_check": { "type": "string" },
+        "query_or_command": { "type": "string" },
+        "ui_effect_evidence_id": { "type": "string" },
+        "screenshot_path": { "type": "string" },
+        "summary": { "type": "string" }
+      }
+    },
+    "action_card": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["story_id", "evidence_id", "status"],
+      "properties": {
+        "story_id": { "type": "string", "minLength": 1 },
+        "evidence_id": { "type": "string" },
+        "action_index": { "type": ["integer", "null"] },
+        "action_type": { "type": "string" },
+        "route": { "type": "string" },
+        "target": { "type": "string" },
+        "status": { "type": "string" },
+        "before_screenshot": { "type": "string" },
+        "after_screenshot": { "type": "string" },
+        "before_state_path": { "type": "string" },
+        "after_state_path": { "type": "string" },
+        "summary": { "type": "string" }
+      }
+    }
+  }
+}

@@ -22,6 +22,29 @@ Este arquivo adiciona as **regras específicas da Fábrica** em cima do system p
 
 > **Regra de leitura:** você NÃO pode começar a codar antes de ler as duas fontes. O Coordenador vai validar sua primeira interação verificando se você usou conceitos do system prompt oficial (ex: `ChartContainer`, `ShadcnBarChart`, `deployToS3Mitra`, `listIntegrationTemplatesMitra`).
 
+### 0.3. Primeiro artefato obrigatório: `agent_readiness.json`
+
+Antes de executar qualquer ação que altere o projeto, inclusive `npm install`, cópia de assets, geração de arquivos, edição de código, DDL, seed ou deploy, você deve escrever `agent_readiness.json` no diretório raiz do produto.
+
+Esse arquivo precisa provar leitura por evidência objetiva:
+
+- path absoluto, bytes e `sha256` de `AGENTS.md`
+- path absoluto, bytes e `sha256` de `.env.local` sem vazar secrets
+- path absoluto, bytes e `sha256` de `system_prompt.md`
+- path absoluto, bytes e `sha256` de `dev.md`
+- path absoluto, bytes e `sha256` de `development_mission.json` ou pacote equivalente recebido
+- path absoluto, bytes e `sha256` de `runtime_contract.json`
+- lista dos artefatos de escopo aprovados lidos
+- `blocking_gaps: []` quando puder prosseguir
+
+Depois de escrever, rode:
+
+```bash
+node /opt/mitra-factory/mitra-autonomous-factory/scripts/validate-agent-readiness.mjs agent_readiness.json
+```
+
+Se o validador falhar, pare e registre o motivo em `questionamentos_{sistema}_r{N}.md`. Qualquer edição antes desse readiness é falha de protocolo e deve ser reprovada pelo Coordenador.
+
 ---
 
 ## 1. Meta: passar no QA Horizontal 10/10/10/10 ou reprovado

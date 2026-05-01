@@ -8,8 +8,10 @@
     "schema_version",
     "factory_instance_code",
     "root_dir",
+    "canonical_repo",
     "mitra",
     "factory_control_project",
+    "meta_agent",
     "product_project_defaults",
     "coordinator_defaults",
     "telegram_wrapper",
@@ -20,6 +22,17 @@
     "schema_version": { "const": "factory.v2" },
     "factory_instance_code": { "type": "string", "pattern": "^[a-z0-9][a-z0-9_-]{2,80}$" },
     "root_dir": { "type": "string", "minLength": 1 },
+    "canonical_repo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["url", "ref", "local_dir", "prompt_manifest_path"],
+      "properties": {
+        "url": { "type": "string", "minLength": 1 },
+        "ref": { "type": "string", "minLength": 1 },
+        "local_dir": { "type": "string", "minLength": 1 },
+        "prompt_manifest_path": { "type": "string", "minLength": 1 }
+      }
+    },
     "mitra": {
       "type": "object",
       "additionalProperties": false,
@@ -70,6 +83,20 @@
         "mitra_agent_dir": { "type": "string", "minLength": 1 }
       }
     },
+    "meta_agent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bot_username", "bot_token_secret_ref", "dir_root", "model", "session_runtime", "prompt_path", "heartbeat_path"],
+      "properties": {
+        "bot_username": { "type": "string", "pattern": "^@[A-Za-z0-9_]{5,32}$" },
+        "bot_token_secret_ref": { "type": "string", "minLength": 1 },
+        "dir_root": { "type": "string", "minLength": 1 },
+        "model": { "const": "gpt-5.5" },
+        "session_runtime": { "const": "tmux" },
+        "prompt_path": { "type": "string", "minLength": 1 },
+        "heartbeat_path": { "type": "string", "minLength": 1 }
+      }
+    },
     "coordinator_defaults": {
       "type": "object",
       "additionalProperties": false,
@@ -104,11 +131,11 @@
       "properties": {
         "allowed_fields": {
           "type": "array",
-          "items": { "enum": ["project_name", "telegram_bot_ref"] }
+          "items": { "enum": ["project_name", "project_bot_username", "project_bot_token_secret_ref"] }
         },
         "forbidden_fields": {
           "type": "array",
-          "items": { "enum": ["domain", "workspace_id", "factory_project_id", "coordinator_model", "initial_request_type", "initial_intent_message", "vps_config"] }
+          "items": { "enum": ["domain", "workspace_id", "factory_project_id", "coordinator_model", "initial_request_type", "initial_intent_message", "vps_config", "raw_bot_token"] }
         },
         "creates_product_project_in_configured_workspace": { "const": true },
         "initial_message_required": { "const": false }

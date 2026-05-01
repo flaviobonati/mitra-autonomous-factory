@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mitra.factory/schemas/next_mission.schema.json",
+  "title": "Factory Next Mission",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "phase",
+    "current_event",
+    "allowed_actor",
+    "target_agent",
+    "required_model",
+    "mission_type",
+    "title",
+    "mission_instruction",
+    "next_goal",
+    "next_event",
+    "allowed_actions",
+    "forbidden_actions",
+    "required_prompt_paths",
+    "input_artifacts",
+    "required_outputs",
+    "schemas_or_validators",
+    "preflight_checks",
+    "workdir_requirements",
+    "success_criteria",
+    "blocking_conditions"
+  ],
+  "properties": {
+    "phase": { "type": "string", "minLength": 1 },
+    "current_event": { "type": "string", "minLength": 1 },
+    "allowed_actor": { "type": "string", "minLength": 1 },
+    "target_agent": { "type": "string", "minLength": 1 },
+    "required_model": { "type": "string", "minLength": 1 },
+    "mission_type": { "type": "string", "minLength": 1 },
+    "title": { "type": "string", "minLength": 1 },
+    "mission_instruction": { "type": "string", "minLength": 1 },
+    "next_goal": { "type": "string", "minLength": 1 },
+    "next_event": { "type": "string", "minLength": 1 },
+    "allowed_actions": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "forbidden_actions": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "required_prompt_paths": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "input_artifacts": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "required_outputs": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "schemas_or_validators": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "preflight_checks": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "workdir_requirements": {
+      "type": "object",
+      "required": ["required", "scope", "forbidden", "must_have"],
+      "properties": {
+        "required": { "type": "boolean" },
+        "scope": { "type": "string", "minLength": 1 },
+        "forbidden": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "must_have": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "success_criteria": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "blocking_conditions": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "checklist": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "spawn_contract": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

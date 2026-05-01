@@ -23,7 +23,8 @@
     "uncovered_stories",
     "failed_stories",
     "failed_flows",
-    "bugs_found"
+    "bugs_found",
+    "qa_core_checklist_execution"
   ],
   "properties": {
     "execution_id": { "type": "string", "minLength": 1 },
@@ -110,9 +111,95 @@
     "bugs_found": {
       "type": "array",
       "items": { "$ref": "#/$defs/bug" }
+    },
+    "qa_core_checklist_execution": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/qa_core_check" }
+    },
+    "bug_retest_matrix": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/bug_retest" }
     }
   },
   "$defs": {
+    "qa_core_check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "check_id",
+        "dimension",
+        "source_rule",
+        "requirement",
+        "status",
+        "evidence"
+      ],
+      "properties": {
+        "check_id": { "type": "string", "minLength": 1 },
+        "dimension": {
+          "type": "string",
+          "enum": ["ui", "ux", "features", "data_flow", "rule", "dev_check"]
+        },
+        "source_rule": { "type": "string", "minLength": 1 },
+        "requirement": { "type": "string", "minLength": 1 },
+        "status": {
+          "type": "string",
+          "enum": ["PASS", "FAIL", "NA_WITH_REASON"]
+        },
+        "mandatory": { "type": "boolean" },
+        "method": { "type": "string" },
+        "actual": { "type": "string" },
+        "evidence": { "type": "string", "minLength": 20 },
+        "screenshot_path": { "type": "string" },
+        "artifact_path": { "type": "string" },
+        "query_or_command": { "type": "string" }
+      }
+    },
+    "bug_retest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bug_id",
+        "origin_report",
+        "origin_failed_checks",
+        "status",
+        "evidence_by_check"
+      ],
+      "properties": {
+        "bug_id": { "type": "string", "minLength": 1 },
+        "origin_report": { "type": "string", "minLength": 1 },
+        "origin_failed_checks": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "status": {
+          "type": "string",
+          "enum": ["PASS", "FAIL", "BLOCKED"]
+        },
+        "evidence_by_check": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": { "$ref": "#/$defs/retest_evidence" }
+        }
+      }
+    },
+    "retest_evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "method", "actual"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["PASS", "FAIL", "BLOCKED"]
+        },
+        "method": { "type": "string", "minLength": 1 },
+        "actual": { "type": "string", "minLength": 20 },
+        "screenshot_path": { "type": "string" },
+        "artifact_path": { "type": "string" },
+        "query_or_command": { "type": "string" }
+      }
+    },
     "gap": {
       "type": "object",
       "additionalProperties": false,

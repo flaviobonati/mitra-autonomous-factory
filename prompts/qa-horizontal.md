@@ -27,7 +27,7 @@ The Planner must also convert the mandatory rules inherited from `qa-core.md` in
 
 The Planner output must include `qa_core_checklist` with stable IDs and enough context for the Executor to test each item:
 
-- `DESIGN-01..DESIGN-27` for every Design check in `qa-core.md`.
+- `DESIGN-01..DESIGN-35` for every Design/cross-cutting check in `qa-core.md`.
 - `UX-PERSONA-*` for each persona journey or horizontal UX journey that must be scored.
 - `FEATURE-MUST-*` for each feature MUST from the approved scope.
 - `DATAFLOW-*` for each approved data-flow chain.
