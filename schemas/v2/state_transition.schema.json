@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mitra.factory/schemas/v2/state_transition.schema.json",
+  "title": "State Transition v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "transition_id",
+    "from_phase",
+    "event_type",
+    "to_phase",
+    "next_mission_type",
+    "card_status",
+    "allowed_actor",
+    "invalid_transition_policy"
+  ],
+  "properties": {
+    "schema_version": { "const": "factory.v2" },
+    "transition_id": { "type": "string", "pattern": "^tr_[a-z0-9][a-z0-9_-]{4,120}$" },
+    "from_phase": { "$ref": "#/$defs/phase" },
+    "event_type": { "type": "string", "minLength": 1 },
+    "to_phase": { "$ref": "#/$defs/phase" },
+    "next_mission_type": { "type": "string", "minLength": 1 },
+    "card_status": { "enum": ["ready", "running", "blocked", "waiting_user", "done", "archived"] },
+    "allowed_actor": { "type": "string", "minLength": 1 },
+    "invalid_transition_policy": { "const": "emit_blocked_event_no_fallback" },
+    "required_payload_fields": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "$defs": {
+    "phase": {
+      "enum": [
+        "Scope Discovery & Construction",
+        "Development",
+        "QA Horizontal",
+        "Fix / Retest Horizontal",
+        "QA Story Validation",
+        "Fix / Retest Story",
+        "QA Consolidation",
+        "Release Review",
+        "Production"
+      ]
+    }
+  }
+}

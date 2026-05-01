@@ -1,0 +1,18 @@
+{
+  "schema_version": "factory.v2",
+  "occurrence_code": "occ_sim_zendesk_20260501",
+  "factory_instance_code": "mitra_factory_current",
+  "workspace_id": "19658",
+  "project_registry_id": "projreg_47610",
+  "card_code": "card_sim_zendesk_20260501",
+  "title": "SIM Zendesk Next Mission",
+  "status": "running",
+  "current_phase": "QA Horizontal",
+  "created_at": "2026-05-01T01:10:21Z",
+  "updated_at": "2026-05-01T01:13:25Z",
+  "source": {
+    "kind": "simulation",
+    "idempotency_key": "exec_sf_zendesk_20260501t011021:occurrence"
+  },
+  "tags": ["simulation", "next-mission"]
+}

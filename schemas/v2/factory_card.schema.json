@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mitra.factory/schemas/v2/factory_card.schema.json",
+  "title": "Factory Card v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "card_code",
+    "occurrence_code",
+    "project_registry_id",
+    "coordinator_code",
+    "phase",
+    "status",
+    "title",
+    "next_mission_id",
+    "last_event_id",
+    "updated_at"
+  ],
+  "properties": {
+    "schema_version": { "const": "factory.v2" },
+    "card_code": { "type": "string", "pattern": "^card_[a-z0-9][a-z0-9_-]{4,120}$" },
+    "occurrence_code": { "type": "string", "pattern": "^occ_[a-z0-9][a-z0-9_-]{4,120}$" },
+    "project_registry_id": { "type": "string", "minLength": 1 },
+    "coordinator_code": { "type": "string", "pattern": "^coord_[a-z0-9][a-z0-9_-]{4,120}$" },
+    "phase": { "$ref": "#/$defs/phase" },
+    "status": { "enum": ["ready", "running", "blocked", "waiting_user", "done", "archived"] },
+    "title": { "type": "string", "minLength": 1 },
+    "next_mission_id": { "type": "string", "pattern": "^nm_[a-z0-9][a-z0-9_-]{4,120}$" },
+    "last_event_id": { "type": "string", "pattern": "^evt_[a-z0-9][a-z0-9_-]{4,120}$" },
+    "blocked_reason": { "type": "string" },
+    "updated_at": { "$ref": "#/$defs/iso_datetime" }
+  },
+  "$defs": {
+    "phase": {
+      "enum": [
+        "Scope Discovery & Construction",
+        "Development",
+        "QA Horizontal",
+        "Fix / Retest Horizontal",
+        "QA Story Validation",
+        "Fix / Retest Story",
+        "QA Consolidation",
+        "Release Review",
+        "Production"
+      ]
+    },
+    "iso_datetime": {
+      "type": "string",
+      "pattern": "^20[0-9]{2}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+    }
+  }
+}

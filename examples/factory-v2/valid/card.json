@@ -1,0 +1,13 @@
+{
+  "schema_version": "factory.v2",
+  "card_code": "card_sim_zendesk_20260501",
+  "occurrence_code": "occ_sim_zendesk_20260501",
+  "project_registry_id": "projreg_47610",
+  "coordinator_code": "coord_sf_zendesk_20260501t011021",
+  "phase": "QA Horizontal",
+  "status": "running",
+  "title": "SIM SF Zendesk Next Mission",
+  "next_mission_id": "nm_qa_horizontal_planner_spawn_20260501",
+  "last_event_id": "evt_output_validated_20260501",
+  "updated_at": "2026-05-01T01:13:25Z"
+}

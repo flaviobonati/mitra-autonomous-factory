@@ -1,0 +1,28 @@
+{
+  "schema_version": "factory.v2",
+  "next_mission_id": "nm_bad_missing_workdir",
+  "phase": "Development",
+  "current_event": "scope_approved",
+  "allowed_actor": "coordinator",
+  "target_agent": "dev",
+  "required_model": "gpt-5.5",
+  "mission_type": "dev_spawn",
+  "title": "Fazer o dev",
+  "mission_instruction": "Spawne o dev.",
+  "next_goal": "Comecar desenvolvimento",
+  "next_event": "agent_spawned",
+  "required_prompt_paths": ["prompts/dev.md"],
+  "input_artifacts": ["scope_state.json"],
+  "required_outputs": ["dev_handoff.json"],
+  "schemas_or_validators": ["schemas/dev_handoff.schema.json"],
+  "preflight_checks": ["git clean"],
+  "allowed_actions": ["spawn dev"],
+  "forbidden_actions": ["tocar factory"],
+  "success_criteria": ["dev spawned"],
+  "blocking_conditions": ["scope ausente"],
+  "quality_score": {
+    "simplicity_objectivity": 6,
+    "max_score": 10,
+    "failed_checks": ["missing workdir_requirements", "mission_instruction too vague"]
+  }
+}

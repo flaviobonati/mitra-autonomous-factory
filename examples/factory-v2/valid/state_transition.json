@@ -1,0 +1,12 @@
+{
+  "schema_version": "factory.v2",
+  "transition_id": "tr_output_validated_to_qa_horizontal",
+  "from_phase": "Development",
+  "event_type": "output_validated",
+  "to_phase": "QA Horizontal",
+  "next_mission_type": "qa_horizontal_planner_spawn",
+  "card_status": "running",
+  "allowed_actor": "coordinator",
+  "invalid_transition_policy": "emit_blocked_event_no_fallback",
+  "required_payload_fields": ["handoff_valid"]
+}

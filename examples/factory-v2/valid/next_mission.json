@@ -1,0 +1,39 @@
+{
+  "schema_version": "factory.v2",
+  "next_mission_id": "nm_qa_horizontal_planner_spawn_20260501",
+  "phase": "QA Horizontal",
+  "current_event": "output_validated",
+  "allowed_actor": "coordinator",
+  "target_agent": "qa_planner",
+  "required_model": "gpt-5.5",
+  "mission_type": "qa_horizontal_planner_spawn",
+  "title": "Spawnar QA Planner horizontal",
+  "mission_instruction": "Crie a missao do QA Horizontal Planner com prompts, escopo aprovado, handoff do Dev, deploy URL, validadores e contrato de saida; registre agent_spawned com idempotency key nova e aguarde agent_output_received.",
+  "next_goal": "Gerar plano horizontal completo antes do executor atribuir notas.",
+  "next_event": "agent_spawned",
+  "idempotency": {
+    "required": true,
+    "key_rule": "execution_code:event_type:target_agent:mission_type:round",
+    "example_key": "exec_sf_zendesk_20260501t011021:agent_spawned:qa_planner:qa_horizontal_planner_spawn:r1"
+  },
+  "workdir_requirements": {
+    "required": true,
+    "scope": "coordinator_dir",
+    "forbidden": ["factory_control_project_dir", "other_product_project_dir"],
+    "must_have": ["COORDINATOR.md", "missions/runtime_contract.json", "prompts/qa-horizontal.md"]
+  },
+  "required_prompt_paths": ["prompts/qa-core.md", "prompts/qa-horizontal.md"],
+  "input_artifacts": ["dev_handoff.json", "scope_state.json", "deploy_url", "runtime_contract.json"],
+  "required_outputs": ["missions/qa_horizontal_planner_prompt.md", "agent_spawned.json", "logs/qa_horizontal_planner_stdout.log"],
+  "schemas_or_validators": ["schemas/v2/next_mission_v2.schema.json", "schemas/qa_result.schema.json"],
+  "preflight_checks": ["git status captured", "deploy URL reachable", "QA prompts copied", "tmux session name unused"],
+  "allowed_actions": ["create mission prompt", "start qa_planner tmux", "register agent_spawned via Central System"],
+  "forbidden_actions": ["run QA executor before planner output", "infer missing scope from memory", "write in factory control as product"],
+  "success_criteria": ["agent_spawned persisted", "planner tmux exists", "next event expected is agent_output_received"],
+  "blocking_conditions": ["missing Dev handoff", "deploy unreachable", "QA prompt missing", "product project equals factory project"],
+  "quality_score": {
+    "simplicity_objectivity": 10,
+    "max_score": 10,
+    "failed_checks": []
+  }
+}

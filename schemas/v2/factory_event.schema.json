@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mitra.factory/schemas/v2/factory_event.schema.json",
+  "title": "Factory Event v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "event_id",
+    "occurrence_code",
+    "card_code",
+    "execution_code",
+    "event_type",
+    "phase",
+    "actor",
+    "direction",
+    "idempotency_key",
+    "payload",
+    "created_at"
+  ],
+  "properties": {
+    "schema_version": { "const": "factory.v2" },
+    "event_id": { "type": "string", "pattern": "^evt_[a-z0-9][a-z0-9_-]{4,120}$" },
+    "occurrence_code": { "type": "string", "pattern": "^occ_[a-z0-9][a-z0-9_-]{4,120}$" },
+    "card_code": { "type": "string", "pattern": "^card_[a-z0-9][a-z0-9_-]{4,120}$" },
+    "execution_code": { "type": "string", "pattern": "^exec_[a-z0-9][a-z0-9_-]{4,120}$" },
+    "event_type": {
+      "enum": [
+        "project_created",
+        "telegram_message_received",
+        "coordinator_response_sent",
+        "user_message_received",
+        "intake_classified",
+        "followup_question_sent",
+        "intake_answer",
+        "researcher_brief",
+        "researcher_artifacts_delivery",
+        "scope_canonicalization_delivery",
+        "scope_approved",
+        "mission_created",
+        "agent_spawned",
+        "agent_output_received",
+        "output_validated",
+        "qa_failed",
+        "qa_approved",
+        "blocked",
+        "blocked_resolved"
+      ]
+    },
+    "phase": { "$ref": "#/$defs/phase" },
+    "actor": { "type": "string", "minLength": 1 },
+    "direction": { "enum": ["inbound", "outbound", "internal"] },
+    "idempotency_key": { "type": "string", "minLength": 8 },
+    "payload": { "type": "object", "additionalProperties": true },
+    "telegram_message_id": { "type": "string" },
+    "created_at": { "$ref": "#/$defs/iso_datetime" }
+  },
+  "$defs": {
+    "phase": {
+      "enum": [
+        "Scope Discovery & Construction",
+        "Development",
+        "QA Horizontal",
+        "Fix / Retest Horizontal",
+        "QA Story Validation",
+        "Fix / Retest Story",
+        "QA Consolidation",
+        "Release Review",
+        "Production"
+      ]
+    },
+    "iso_datetime": {
+      "type": "string",
+      "pattern": "^20[0-9]{2}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "schema_version": "factory.v2",
+  "event_id": "evt_output_validated_20260501",
+  "occurrence_code": "occ_sim_zendesk_20260501",
+  "card_code": "card_sim_zendesk_20260501",
+  "execution_code": "exec_sf_zendesk_20260501t011021",
+  "event_type": "output_validated",
+  "phase": "Development",
+  "actor": "coordinator",
+  "direction": "internal",
+  "idempotency_key": "exec_sf_zendesk_20260501t011021:12_output_validated",
+  "payload": {
+    "handoff_valid": true,
+    "source": "sf_simulation"
+  },
+  "created_at": "2026-05-01T01:13:24Z"
+}

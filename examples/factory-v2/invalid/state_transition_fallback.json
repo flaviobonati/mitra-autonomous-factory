@@ -1,0 +1,12 @@
+{
+  "schema_version": "factory.v2",
+  "transition_id": "tr_bad_fallback_to_intake",
+  "from_phase": "Development",
+  "event_type": "unknown_event",
+  "to_phase": "Scope Discovery & Construction",
+  "next_mission_type": "intake",
+  "card_status": "running",
+  "allowed_actor": "coordinator",
+  "invalid_transition_policy": "fallback_to_intake",
+  "required_payload_fields": []
+}
