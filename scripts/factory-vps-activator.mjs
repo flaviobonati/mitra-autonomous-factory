@@ -6,6 +6,7 @@ import {
   mkdirSync,
   readdirSync,
   readFileSync,
+  rmSync,
   statSync,
   writeFileSync,
 } from 'node:fs';
@@ -78,6 +79,13 @@ function copyFile(src, dest) {
 function copyDir(src, dest) {
   if (!existsSync(src)) throw new Error(`Missing directory: ${src}`);
   mkdirSync(dest, { recursive: true });
+  cpSync(src, dest, { recursive: true });
+}
+
+function copyFreshDir(src, dest) {
+  if (!existsSync(src)) throw new Error(`Missing directory: ${src}`);
+  rmSync(dest, { recursive: true, force: true });
+  mkdirSync(dirname(dest), { recursive: true });
   cpSync(src, dest, { recursive: true });
 }
 
@@ -333,7 +341,7 @@ function copyCoordinatorPackage(row, repoDir, product, botReadiness) {
   mkdirSync(inboxDir, { recursive: true });
   mkdirSync(missionsDir, { recursive: true });
 
-  copyDir(repoDir, `${coordinatorDir}/coordinator-git`);
+  copyFreshDir(repoDir, `${coordinatorDir}/coordinator-git`);
   copyDir(`${repoDir}/prompts`, `${coordinatorDir}/prompts`);
   copyDir(`${repoDir}/docs`, `${coordinatorDir}/docs`);
   copyDir(`${repoDir}/schemas`, `${coordinatorDir}/schemas`);
@@ -496,7 +504,7 @@ async function activateMetaAgent(row, repo) {
 
     const sourcePrompt = `${repo.path}/prompts/meta-agent.md`;
     const localPrompt = `${metaAgentDir}/META_AGENT.md`;
-    copyDir(repo.path, `${metaAgentDir}/meta-agent-git`);
+    copyFreshDir(repo.path, `${metaAgentDir}/meta-agent-git`);
     copyDir(`${repo.path}/prompts`, `${metaAgentDir}/prompts`);
     copyDir(`${repo.path}/docs`, `${metaAgentDir}/docs`);
     copyDir(`${repo.path}/schemas`, `${metaAgentDir}/schemas`);

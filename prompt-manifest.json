@@ -1,8 +1,8 @@
 {
   "schema_version": "prompt_manifest.v1",
-  "generated_at": "2026-05-01T13:12:27.797Z",
+  "generated_at": "2026-05-01T13:13:54.489Z",
   "status": "draft_current_worktree",
-  "repo_head_at_generation": "6cc4635b6c0181ff245387d2db52900b335a169f",
+  "repo_head_at_generation": "7b69cb8a5b9467286ada3a4460c1c7d44c1cd465",
   "note": "Hashes are for the current working tree. A friend-ready release must regenerate this manifest from a clean committed ref.",
   "required_files": [
     {
@@ -110,8 +110,8 @@
     {
       "path": "scripts/factory-vps-activator.mjs",
       "role": "vps_activator",
-      "sha256": "de73da0f5f81e251469267f3ec7739bc9cbc6aecfc634eb91072b4743ca16424",
-      "bytes": 33040
+      "sha256": "506b339e75202d2cd8884f1c882b02d12e1626f21a55bc0bd7b7a6b70729648e",
+      "bytes": 33309
     },
     {
       "path": "scripts/project-telegram-bot-runner.mjs",
