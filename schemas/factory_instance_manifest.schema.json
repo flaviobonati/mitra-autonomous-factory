@@ -26,12 +26,13 @@
     "mitra": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["base_url", "integrations_url", "workspace_id", "token_env"],
+      "required": ["base_url", "integrations_url", "workspace_id", "token_env", "env_file"],
       "properties": {
         "base_url": { "type": "string", "minLength": 1 },
         "integrations_url": { "type": "string", "minLength": 1 },
         "workspace_id": { "type": "string", "pattern": "^[0-9]+$" },
-        "token_env": { "type": "string", "pattern": "^[A-Z0-9_]+$" }
+        "token_env": { "type": "string", "pattern": "^[A-Z0-9_]+$" },
+        "env_file": { "type": "string", "minLength": 1 }
       }
     },
     "factory_control_project": {

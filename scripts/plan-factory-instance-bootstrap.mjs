@@ -22,6 +22,7 @@ if (validation.status !== 0) {
 const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
 const validationJson = JSON.parse(validation.stdout);
 const root = manifest.root_dir;
+const createProductScript = `${root}/mitra-autonomous-factory/scripts/create-product-project-from-instance.mjs`;
 const productName = `${manifest.product_project_defaults.name_prefix} <cliente-ou-produto>`;
 const productWorkdir = `${root}/workspaces/w-${manifest.product_project_defaults.workspace_id}/p-<project_id_criado>`;
 const coordinatorCode = `coord_<tema>_<timestamp>`;
@@ -51,9 +52,9 @@ const plan = {
       id: '02_create_product_project',
       actor: 'meta_agent',
       mutates_run_state: false,
-      command: `MITRA_WORKSPACE_ID=${manifest.product_project_defaults.workspace_id} ${manifest.mitra.token_env}=<secret> node ${root}/mitra-autonomous-factory/scripts/create-product-project-for-coordinator.mjs --workspace-id ${manifest.product_project_defaults.workspace_id} --name "${productName}"`,
+      command: `node ${createProductScript} ${manifestPath} --name "${productName}" --execute`,
       outputs: ['product_project_id', 'product_project_dir', 'frontend/', 'backend/', '.git/', '.env.local', 'AGENTS.md', 'system_prompt.md'],
-      gate: 'project_id must not equal factory_control_project_id'
+      gate: 'manifest mitra.env_file workspace must match, token is redacted, project_id must not equal factory_control_project_id'
     },
     {
       id: '03_prepare_coordinator_package',
