@@ -209,11 +209,17 @@ async function updateMetaStatus(row, status, nextStep, errorMessage = '') {
 
 async function updateProjectStatus(row, status, nextStep, errorMessage = '') {
   const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
+  const shortStatusByRegistry = {
+    coordinator_tmux_started_waiting_telegram: 'coord_tmux_started',
+    blocked_public_repo_unreachable: 'repo_unreachable',
+    mitra_project_created_activation_requested: 'activation_requested',
+  };
+  const registryStatus = shortStatusByRegistry[status] ?? String(status).slice(0, 40);
   await dml(
     `UPDATE FACTORY_PROJECT_REQUESTS SET STATUS=${sqlValue(status)}, NEXT_STEP=${sqlValue(nextStep)}, ERROR_MESSAGE=${sqlValue(errorMessage)}, UPDATED_AT=${sqlValue(now)} WHERE REQUEST_CODE=${sqlValue(row.REQUEST_CODE)}`
   );
   if (row.REGISTRY_CODE) {
-    await dml(`UPDATE PROJECT_REGISTRY SET STATUS=${sqlValue(status)}, UPDATED_AT=${sqlValue(now)} WHERE REGISTRY_CODE=${sqlValue(row.REGISTRY_CODE)}`);
+    await dml(`UPDATE PROJECT_REGISTRY SET STATUS=${sqlValue(registryStatus)}, UPDATED_AT=${sqlValue(now)} WHERE REGISTRY_CODE=${sqlValue(row.REGISTRY_CODE)}`);
   }
   if (row.COORDINATOR_CODE) {
     await dml(`UPDATE COORDINATOR_REGISTRY SET STATUS=${sqlValue(status)}, UPDATED_AT=${sqlValue(now)} WHERE COORDINATOR_CODE=${sqlValue(row.COORDINATOR_CODE)}`);
