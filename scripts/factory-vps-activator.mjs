@@ -467,7 +467,13 @@ function startCodexTmuxIfMissing(session, cwd, promptFile, logFile, logLabel) {
   const hasSession = run('tmux', ['has-session', '-t', session]);
   if (hasSession.status === 0) return { started: false, exists: true, session };
 
-  const command = `codex --dangerously-bypass-approvals-and-sandbox -m gpt-5.5 -C ${shellQuote(cwd)}`;
+  const command = [
+    'umask 077',
+    `printf '%s\\n' ${shellQuote(`${new Date().toISOString()} ${logLabel} boot exec starting`)} >> ${shellQuote(logFile)}`,
+    `NO_UPDATE_NOTIFIER=1 CODEX_NO_UPDATE_NOTIFIER=1 codex exec --json --dangerously-bypass-approvals-and-sandbox -C ${shellQuote(cwd)} -m gpt-5.5 - < ${shellQuote(promptFile)} >> ${shellQuote(logFile)} 2>&1`,
+    `printf '%s\\n' ${shellQuote(`${new Date().toISOString()} ${logLabel} interactive shell starting`)} >> ${shellQuote(logFile)}`,
+    `exec env NO_UPDATE_NOTIFIER=1 CODEX_NO_UPDATE_NOTIFIER=1 codex --dangerously-bypass-approvals-and-sandbox -m gpt-5.5 -C ${shellQuote(cwd)}`,
+  ].join(' ; ');
   const started = run('tmux', ['new-session', '-d', '-s', session, '-c', cwd, command], { cwd });
   if (started.status !== 0) throw new Error(`${logLabel} tmux start failed: ${started.stderr || started.stdout}`);
 
@@ -475,12 +481,6 @@ function startCodexTmuxIfMissing(session, cwd, promptFile, logFile, logLabel) {
   if (check.status !== 0) throw new Error(`${logLabel} tmux did not stay alive: ${check.stderr || check.stdout}`);
 
   run('tmux', ['pipe-pane', '-o', '-t', session, `cat >> ${shellQuote(logFile)}`]);
-  const bufferName = `${slug(session).slice(0, 60)}_boot`;
-  const loaded = run('tmux', ['load-buffer', '-b', bufferName, promptFile]);
-  if (loaded.status !== 0) throw new Error(`${logLabel} boot prompt load failed: ${loaded.stderr || loaded.stdout}`);
-  const pasted = run('tmux', ['paste-buffer', '-b', bufferName, '-t', session]);
-  if (pasted.status !== 0) throw new Error(`${logLabel} boot prompt paste failed: ${pasted.stderr || pasted.stdout}`);
-  run('tmux', ['send-keys', '-t', session, 'Enter']);
   return { started: true, exists: true, session };
 }
 
