@@ -1,8 +1,8 @@
 {
   "schema_version": "prompt_manifest.v1",
-  "generated_at": "2026-05-01T13:04:14.518Z",
+  "generated_at": "2026-05-01T13:09:15.296Z",
   "status": "draft_current_worktree",
-  "repo_head_at_generation": "97a48ce06550a1269f358c08fd7ef6741878cca4",
+  "repo_head_at_generation": "2399bd0053798595f50939fc0d8eac3467ad10da",
   "note": "Hashes are for the current working tree. A friend-ready release must regenerate this manifest from a clean committed ref.",
   "required_files": [
     {
@@ -74,8 +74,8 @@
     {
       "path": "docs/portable-factory-bootstrap.md",
       "role": "portable_bootstrap_contract",
-      "sha256": "0f57a7dc9aea32dcf4d5fe1d645c77e55b40600bf8f05cb6b344433269a09f57",
-      "bytes": 12992
+      "sha256": "89de8ab807cdb651e4cedd2c970920e2215d3e0d7a5c11c3258150488182fe44",
+      "bytes": 13716
     },
     {
       "path": "schemas/v2/factory_instance_config.schema.json",
@@ -110,8 +110,8 @@
     {
       "path": "scripts/factory-vps-activator.mjs",
       "role": "vps_activator",
-      "sha256": "d4621e0e5862cb1b3d2f2135ff99987f6ac9993080d8fc576635be45345fef61",
-      "bytes": 29943
+      "sha256": "1790cf337438b8db379ba1bf6b93035aadf3d2d56fbc1266907c59bb460fd87a",
+      "bytes": 32985
     },
     {
       "path": "scripts/project-telegram-bot-runner.mjs",
@@ -128,51 +128,52 @@
     {
       "path": "docs/factory-activation-test-checklist.md",
       "role": "activation_test_checklist",
-      "sha256": "4525964391cf3285a12f825f5c916c30cd7b7699da8297e0871ef73d6b078d96",
-      "bytes": 9016
+      "sha256": "e9964cc7c2e10f265f2d304a46b53340f79139a63bb2a8490f08c2b28fb75524",
+      "bytes": 9141
     },
     {
       "path": "scripts/simulate-cmms-next-missions.mjs",
       "role": "cmms_next_mission_regression",
       "sha256": "195a9190e387cd216ad4d5c80eaac58ba02bbf4409da685ea6a06a99efd86e3a",
       "bytes": 25359
-    }
-  ],
-  "external_pinned_dependencies": [
+    },
     {
-      "path": "/opt/mitra-factory/mitra-agent-minimal/system_prompt.md",
+      "path": "mitra-agent-minimal/system_prompt.md",
       "role": "mitra_base_system_prompt",
       "sha256": "0c338599fa7f793fc7b313dd073e14b6b68384df0688b4487f03a4171caabc3a",
-      "bytes": 136488,
-      "portability_requirement": "Vendor this file into the canonical repo or install it from a pinned package/submodule with this hash before starting any actor."
+      "bytes": 136488
     },
     {
-      "path": "/opt/mitra-factory/mitra-agent-minimal/AGENTS.md",
+      "path": "mitra-agent-minimal/AGENTS.md",
       "role": "mitra_base_agents_md",
       "sha256": "5edb9314ea407182d007c6e52baa7d06baea8b51909f422f0e6a062eff16ea4a",
-      "bytes": 1085,
-      "portability_requirement": "Vendor this file into the canonical repo or install it from a pinned package/submodule with this hash before starting Dev or QA."
+      "bytes": 1085
     },
     {
-      "path": "/opt/mitra-factory/mitra-agent-minimal/CLAUDE.md",
+      "path": "mitra-agent-minimal/CLAUDE.md",
       "role": "mitra_base_claude_md",
       "sha256": "2aa9284afbaf3919249893325835d35298787f905725d80ef5604c386b238ff3",
-      "bytes": 1569,
-      "portability_requirement": "Vendor this file into the canonical repo or install it from a pinned package/submodule with this hash when Claude-based agents are used."
+      "bytes": 1569
     },
     {
-      "path": "/opt/mitra-factory/mitra-agent-minimal/.claude/commands/deploy.md",
+      "path": "mitra-agent-minimal/.claude/commands/deploy.md",
       "role": "mitra_base_claude_command",
       "sha256": "9a3447d8186f3f3e1f150d318a11bedd3b53275788948f42db92b8e1e6e6b6b0",
-      "bytes": 2308,
-      "portability_requirement": "Vendor this command into the canonical repo or install it from a pinned package/submodule when Claude-based agents are used."
+      "bytes": 2308
     },
     {
-      "path": "/opt/mitra-factory/mitra-agent-minimal/.claude/commands/mitra.md",
+      "path": "mitra-agent-minimal/.claude/commands/mitra.md",
       "role": "mitra_base_claude_command",
       "sha256": "bd6af97fd20ef998d477ac286e7f7941b6e7001356f28582e1665fa64163264d",
-      "bytes": 852,
-      "portability_requirement": "Vendor this command into the canonical repo or install it from a pinned package/submodule when Claude-based agents are used."
+      "bytes": 852
+    }
+  ],
+  "external_pinned_dependencies": [],
+  "vendored_dependencies": [
+    {
+      "path": "mitra-agent-minimal",
+      "role": "mitra_base_agent_minimal",
+      "portability_requirement": "Vendored in this public repo so Meta-Agent and Coordinator packages can be created from Git without hidden local prompt dependencies."
     }
   ]
 }

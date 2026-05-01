@@ -81,6 +81,11 @@ function copyDir(src, dest) {
   cpSync(src, dest, { recursive: true });
 }
 
+function mitraAgentSourceDir(repoDir) {
+  const vendored = `${repoDir}/mitra-agent-minimal`;
+  return existsSync(`${vendored}/system_prompt.md`) && existsSync(`${vendored}/AGENTS.md`) ? vendored : MITRA_AGENT_DIR;
+}
+
 function listFiles(root, dir = root) {
   const out = [];
   for (const item of readdirSync(dir)) {
@@ -191,6 +196,12 @@ function publicRepoSnapshot() {
     'schemas/coordinator_spawn_readiness.schema.json',
   ];
   const missing = mandatory.filter((file) => !existsSync(`${CANON_CACHE}/${file}`));
+  const missingMitraMinimal = [
+    'mitra-agent-minimal/system_prompt.md',
+    'mitra-agent-minimal/AGENTS.md',
+    'mitra-agent-minimal/CLAUDE.md',
+  ].filter((file) => !existsSync(`${CANON_CACHE}/${file}`));
+  missing.push(...missingMitraMinimal);
   if (missing.length) {
     return { ok: false, error: `canonical repo snapshot missing required files: ${missing.join(', ')}` };
   }
@@ -241,6 +252,7 @@ async function insertTimeline(executionCode, coordinatorCode, title, description
 }
 
 function ensureProductProject(row, repoDir) {
+  const mitraBaseDir = mitraAgentSourceDir(repoDir);
   const projectDir = row.CREATED_PROJECT_DIR || `${ROOT}/workspaces/w-${row.WORKSPACE_ID || WORKSPACE_ID}/p-${row.CREATED_PROJECT_ID}`;
   const projectId = String(row.CREATED_PROJECT_ID || '').trim();
   if (!projectId) throw new Error('Project request has no CREATED_PROJECT_ID');
@@ -256,10 +268,10 @@ function ensureProductProject(row, repoDir) {
     copyDir(`${TEMPLATE_DIR}/backend`, `${projectDir}/backend`);
   }
 
-  copyFile(`${MITRA_AGENT_DIR}/AGENTS.md`, `${projectDir}/AGENTS.md`);
-  copyFile(`${MITRA_AGENT_DIR}/system_prompt.md`, `${projectDir}/system_prompt.md`);
-  copyFile(`${MITRA_AGENT_DIR}/CLAUDE.md`, `${projectDir}/CLAUDE.md`);
-  copyDir(`${MITRA_AGENT_DIR}/.claude`, `${projectDir}/.claude`);
+  copyFile(`${mitraBaseDir}/AGENTS.md`, `${projectDir}/AGENTS.md`);
+  copyFile(`${mitraBaseDir}/system_prompt.md`, `${projectDir}/system_prompt.md`);
+  copyFile(`${mitraBaseDir}/CLAUDE.md`, `${projectDir}/CLAUDE.md`);
+  copyDir(`${mitraBaseDir}/.claude`, `${projectDir}/.claude`);
   copyFile(`${repoDir}/prompts/dev.md`, `${projectDir}/dev.md`);
 
   const envLocal = [
@@ -308,6 +320,7 @@ function ensureProductProject(row, repoDir) {
 }
 
 function copyCoordinatorPackage(row, repoDir, product, botReadiness) {
+  const mitraBaseDir = mitraAgentSourceDir(repoDir);
   const coordinatorCode = row.COORDINATOR_CODE;
   const executionCode = row.EXECUTION_CODE;
   const coordinatorDir = `${ROOT}/coordinators/${coordinatorCode}`;
@@ -320,16 +333,17 @@ function copyCoordinatorPackage(row, repoDir, product, botReadiness) {
   mkdirSync(inboxDir, { recursive: true });
   mkdirSync(missionsDir, { recursive: true });
 
+  copyDir(repoDir, `${coordinatorDir}/coordinator-git`);
   copyDir(`${repoDir}/prompts`, `${coordinatorDir}/prompts`);
   copyDir(`${repoDir}/docs`, `${coordinatorDir}/docs`);
   copyDir(`${repoDir}/schemas`, `${coordinatorDir}/schemas`);
   copyFile(`${repoDir}/prompts/coordinator.md`, `${coordinatorDir}/COORDINATOR.md`);
   copyFile(`${repoDir}/prompt-manifest.json`, `${coordinatorDir}/prompt-manifest.json`);
 
-  copyFile(`${MITRA_AGENT_DIR}/AGENTS.md`, `${coordinatorDir}/mitra-agent-minimal/AGENTS.md`);
-  copyFile(`${MITRA_AGENT_DIR}/system_prompt.md`, `${coordinatorDir}/mitra-agent-minimal/system_prompt.md`);
-  copyFile(`${MITRA_AGENT_DIR}/CLAUDE.md`, `${coordinatorDir}/mitra-agent-minimal/CLAUDE.md`);
-  copyDir(`${MITRA_AGENT_DIR}/.claude`, `${coordinatorDir}/mitra-agent-minimal/.claude`);
+  copyFile(`${mitraBaseDir}/AGENTS.md`, `${coordinatorDir}/mitra-agent-minimal/AGENTS.md`);
+  copyFile(`${mitraBaseDir}/system_prompt.md`, `${coordinatorDir}/mitra-agent-minimal/system_prompt.md`);
+  copyFile(`${mitraBaseDir}/CLAUDE.md`, `${coordinatorDir}/mitra-agent-minimal/CLAUDE.md`);
+  copyDir(`${mitraBaseDir}/.claude`, `${coordinatorDir}/mitra-agent-minimal/.claude`);
 
   const runtime = {
     coordinator_code: coordinatorCode,
@@ -359,6 +373,7 @@ function copyCoordinatorPackage(row, repoDir, product, botReadiness) {
     canonical_repo_url: PUBLIC_REPO,
     canonical_repo_ref: PUBLIC_REF,
     canonical_repo_head: mustRun('git', ['-C', repoDir, 'rev-parse', 'HEAD']),
+    coordinator_git_dir: `${coordinatorDir}/coordinator-git`,
     coordinator_prompt_path: `${coordinatorDir}/COORDINATOR.md`,
     coordinator_prompt_sha256: sha256(`${coordinatorDir}/COORDINATOR.md`),
     coordinator_prompt_bytes: bytes(`${coordinatorDir}/COORDINATOR.md`),
@@ -448,9 +463,31 @@ function startTmuxIfMissing(session, cwd, command, logLabel) {
   return { started: true, exists: true, session };
 }
 
+function startCodexTmuxIfMissing(session, cwd, promptFile, logFile, logLabel) {
+  const hasSession = run('tmux', ['has-session', '-t', session]);
+  if (hasSession.status === 0) return { started: false, exists: true, session };
+
+  const command = `codex --dangerously-bypass-approvals-and-sandbox -m gpt-5.5 -C ${shellQuote(cwd)}`;
+  const started = run('tmux', ['new-session', '-d', '-s', session, '-c', cwd, command], { cwd });
+  if (started.status !== 0) throw new Error(`${logLabel} tmux start failed: ${started.stderr || started.stdout}`);
+
+  const check = run('tmux', ['has-session', '-t', session]);
+  if (check.status !== 0) throw new Error(`${logLabel} tmux did not stay alive: ${check.stderr || check.stdout}`);
+
+  run('tmux', ['pipe-pane', '-o', '-t', session, `cat >> ${shellQuote(logFile)}`]);
+  const bufferName = `${slug(session).slice(0, 60)}_boot`;
+  const loaded = run('tmux', ['load-buffer', '-b', bufferName, promptFile]);
+  if (loaded.status !== 0) throw new Error(`${logLabel} boot prompt load failed: ${loaded.stderr || loaded.stdout}`);
+  const pasted = run('tmux', ['paste-buffer', '-b', bufferName, '-t', session]);
+  if (pasted.status !== 0) throw new Error(`${logLabel} boot prompt paste failed: ${pasted.stderr || pasted.stdout}`);
+  run('tmux', ['send-keys', '-t', session, 'Enter']);
+  return { started: true, exists: true, session };
+}
+
 async function activateMetaAgent(row, repo) {
   try {
     await validateTelegramBot(row.BOT_TOKEN_SECRET_REF, row.BOT_USERNAME);
+    const mitraBaseDir = mitraAgentSourceDir(repo.path);
     const metaAgentDir = row.META_AGENT_DIR;
     const logsDir = `${metaAgentDir}/logs`;
     const outboxDir = `${metaAgentDir}/outbox`;
@@ -459,9 +496,18 @@ async function activateMetaAgent(row, repo) {
 
     const sourcePrompt = `${repo.path}/prompts/meta-agent.md`;
     const localPrompt = `${metaAgentDir}/META_AGENT.md`;
+    copyDir(repo.path, `${metaAgentDir}/meta-agent-git`);
+    copyDir(`${repo.path}/prompts`, `${metaAgentDir}/prompts`);
+    copyDir(`${repo.path}/docs`, `${metaAgentDir}/docs`);
+    copyDir(`${repo.path}/schemas`, `${metaAgentDir}/schemas`);
     copyFile(sourcePrompt, localPrompt);
+    copyFile(`${repo.path}/prompts/coordinator.md`, `${metaAgentDir}/COORDINATOR.md`);
     copyFile(`${repo.path}/prompt-manifest.json`, `${metaAgentDir}/prompt-manifest.json`);
     copyFile(`${repo.path}/scripts/send-telegram-by-secret-ref.mjs`, `${metaAgentDir}/send-telegram-by-secret-ref.mjs`);
+    copyFile(`${mitraBaseDir}/AGENTS.md`, `${metaAgentDir}/mitra-agent-minimal/AGENTS.md`);
+    copyFile(`${mitraBaseDir}/system_prompt.md`, `${metaAgentDir}/mitra-agent-minimal/system_prompt.md`);
+    copyFile(`${mitraBaseDir}/CLAUDE.md`, `${metaAgentDir}/mitra-agent-minimal/CLAUDE.md`);
+    copyDir(`${mitraBaseDir}/.claude`, `${metaAgentDir}/mitra-agent-minimal/.claude`);
 
     const runtime = {
       meta_agent_code: row.META_AGENT_CODE,
@@ -472,6 +518,12 @@ async function activateMetaAgent(row, repo) {
       prompt_path: localPrompt,
       prompt_sha256: sha256(localPrompt),
       prompt_bytes: bytes(localPrompt),
+      coordinator_context_dir: `${metaAgentDir}/meta-agent-git`,
+      coordinator_prompt_path: `${metaAgentDir}/COORDINATOR.md`,
+      coordinator_prompt_sha256: sha256(`${metaAgentDir}/COORDINATOR.md`),
+      coordinator_prompt_bytes: bytes(`${metaAgentDir}/COORDINATOR.md`),
+      mitra_agent_minimal_dir: `${metaAgentDir}/mitra-agent-minimal`,
+      has_full_coordinator_context: true,
       canonical_repo_url: PUBLIC_REPO,
       canonical_repo_ref: PUBLIC_REF,
       canonical_repo_head: repo.head,
@@ -483,19 +535,15 @@ async function activateMetaAgent(row, repo) {
 
     const bootPrompt = [
       'Leia META_AGENT.md inteiro antes de agir.',
-      'Depois escreva outbox/agent_readiness.json com agent_type=meta_agent, prompt_path, prompt_sha256, prompt_bytes, read_complete=true.',
+      'Leia tambem COORDINATOR.md, prompt-manifest.json, docs/, schemas/ e mitra-agent-minimal/ para entender como a fabrica desenvolve no Mitra.',
+      'Depois escreva outbox/agent_readiness.json com agent_type=meta_agent, prompt_path, prompt_sha256, prompt_bytes, coordinator_context_loaded=true, mitra_agent_minimal_loaded=true, read_complete=true.',
       'Use runtime_contract.json para Telegram, paths e limites.',
       'Voce e o Meta-Agent desta fabrica. Nao seja Coordenador de run. Aguarde mensagens do Telegram ou instrucoes do Flavio.',
     ].join('\n');
     writeFileSync(`${metaAgentDir}/boot_prompt.md`, `${bootPrompt}\n`);
 
-    const cmd = [
-      `cd ${shellQuote(metaAgentDir)}`,
-      'umask 077',
-      `printf '%s\\n' ${shellQuote(`${new Date().toISOString()} meta-agent tmux starting`)} >> logs/meta-agent-tmux.log`,
-      `codex --dangerously-bypass-approvals-and-sandbox -m gpt-5.5 -C ${shellQuote(metaAgentDir)} "$(cat boot_prompt.md)" 2>&1 | tee -a logs/meta-agent-codex.log`,
-    ].join(' && ');
-    startTmuxIfMissing(row.TMUX_SESSION, metaAgentDir, cmd, 'meta-agent');
+    writeFileSync(`${logsDir}/meta-agent-tmux.log`, `${new Date().toISOString()} meta-agent tmux starting\n`, { flag: 'a' });
+    startCodexTmuxIfMissing(row.TMUX_SESSION, metaAgentDir, `${metaAgentDir}/boot_prompt.md`, `${logsDir}/meta-agent-codex.log`, 'meta-agent');
 
     const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
     await dml(
@@ -517,13 +565,8 @@ async function activateProject(row, repo) {
     const product = ensureProductProject(row, repo.path);
     const coordinator = copyCoordinatorPackage(row, repo.path, product, botReadiness);
 
-    const coordinatorCmd = [
-      `cd ${shellQuote(coordinator.coordinatorDir)}`,
-      'umask 077',
-      `printf '%s\\n' ${shellQuote(`${new Date().toISOString()} coordinator tmux starting`)} >> logs/coordinator-tmux.log`,
-      `codex --dangerously-bypass-approvals-and-sandbox -m gpt-5.5 -C ${shellQuote(coordinator.coordinatorDir)} "$(cat boot_prompt.md)" 2>&1 | tee -a logs/coordinator-codex.log`,
-    ].join(' && ');
-    startTmuxIfMissing(row.COORDINATOR_CODE, coordinator.coordinatorDir, coordinatorCmd, 'coordinator');
+    writeFileSync(`${coordinator.coordinatorDir}/logs/coordinator-tmux.log`, `${new Date().toISOString()} coordinator tmux starting\n`, { flag: 'a' });
+    startCodexTmuxIfMissing(row.COORDINATOR_CODE, coordinator.coordinatorDir, `${coordinator.coordinatorDir}/boot_prompt.md`, `${coordinator.coordinatorDir}/logs/coordinator-codex.log`, 'coordinator');
 
     const botSession = `bot_${slug(row.COORDINATOR_CODE).slice(0, 110)}`;
     const botCmd = [

@@ -49,8 +49,19 @@ Every Coordinator package must include, at minimum:
 - `COORDINATOR.md` copied from `prompts/coordinator.md`;
 - all sub-agent prompt MDs: `researcher.md`, `dev.md`, `qa-core.md`, `qa-horizontal.md`, `qa-story.md`, `qa-consolidator.md`;
 - required docs and schemas;
-- Mitra Agent Minimal controlled files: `system_prompt.md`, `AGENTS.md`, `CLAUDE.md` and `.claude/commands/*.md`;
+- a local `coordinator-git/` copy of the public canonical repo snapshot;
+- Mitra Agent Minimal controlled files from the public repo: `mitra-agent-minimal/system_prompt.md`, `AGENTS.md`, `CLAUDE.md` and `.claude/commands/*.md`;
 - source repo URL/ref/resolved commit, sha256 and byte count for each copied prompt/doc/schema.
+
+Every Meta-Agent package must include the same Coordinator context plus the Meta-Agent prompt:
+
+- `META_AGENT.md` copied from `prompts/meta-agent.md`;
+- `COORDINATOR.md` copied from `prompts/coordinator.md` for context only;
+- a local `meta-agent-git/` copy of the public canonical repo snapshot;
+- all prompts, docs, schemas and Mitra Agent Minimal controlled files;
+- a runtime contract proving `has_full_coordinator_context=true`.
+
+This does not make the Meta-Agent a Coordinator. It gives the Meta-Agent the same factory knowledge so it can reason about Mitra, package quality and activation correctness.
 
 The Coordinator must be instructed to read `COORDINATOR.md` completely and prove it with `agent_readiness.json` before any operational act. Dev and QA packages must likewise prove they read their prompt, Mitra Agent Minimal files and runtime contract before coding or testing.
 

@@ -125,7 +125,7 @@ Recheck 1:
 
 Recheck 2:
 
-- Meta-Agent folder exists at `/opt/mitra-factory/meta-agents/<meta_agent_code>` with `META_AGENT.md`, `prompt-manifest.json`, `runtime_contract.json`, `boot_prompt.md`, logs and heartbeat.
+- Meta-Agent folder exists at `/opt/mitra-factory/meta-agents/<meta_agent_code>` with `META_AGENT.md`, `COORDINATOR.md`, `meta-agent-git/`, `prompts/`, `docs/`, `schemas/`, `mitra-agent-minimal/`, `prompt-manifest.json`, `runtime_contract.json`, `boot_prompt.md`, logs and heartbeat.
 
 Recheck 3:
 
@@ -133,7 +133,7 @@ Recheck 3:
 
 Pass condition:
 
-- When the user sends `oi` to that bot, the response is from the Meta-Agent persona, not a Coordinator or product-card actor.
+- When the user sends `oi` to that bot, the response is from the Meta-Agent persona, using the full factory context, not a Coordinator or product-card actor.
 
 ## Gate 4 - Concurrent Coordinators
 
@@ -232,4 +232,3 @@ The activation round is ready only when the evidence bundle contains:
 - Central System registration proof;
 - CMMS regression proof;
 - final score table where every next mission point is `10/10`.
-
